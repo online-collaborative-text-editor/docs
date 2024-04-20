@@ -133,3 +133,64 @@ body {
 .wrapper p a:hover {
     text-decoration: underline;
 }
+.docs-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 5%;
+    padding-right: 5%;
+    
+}
+
+.card {
+    width: 12%; /* For larger screens, 6 cards per row */
+    height: 20%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 16px;
+    margin: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+
+
+.card img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 8px;
+}
+
+.appbar {
+    position: relative;
+    background-color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.appbar h1 {
+    margin: 0;
+}
+
+.appbar-buttons {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.appbar-buttons button {
+    margin-left: 10px;
+    padding: 10px;
+    background-color: rgb(151, 148, 148);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.appbar-buttons button:hover {
+    background-color: #0056b3;
+}
