@@ -10,7 +10,7 @@ const AppBar = ({ title }) => {
                 <Link to="/dashboard"><button>Owned Docs</button></Link>
                 <Link to="/edited"><button>Edited Docs</button></Link>
                 <Link to="/viewed"><button>Viewed Docs</button></Link>
-                <button>Create Doc</button>
+                <Link to ="/editor"><button>Create Doc</button></Link>
             </div>
         </div>
     );

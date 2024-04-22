@@ -194,3 +194,13 @@ body {
 .appbar-buttons button:hover {
     background-color: #0056b3;
 }
+
+#editorcontainer {
+    background-color: #fff;
+    height: 100vh; /* This will make the div take up the whole height of the viewport */
+    width: 80%; /* This will make the div take up the whole width of the viewport */
+    text-align: center;
+    margin-left: 10%;
+
+}
+
