@@ -20,6 +20,7 @@ function App() {
                         <Route path="/viewed" element={<ViewedListing />} />
                         <Route path="/edited" element={<EditedListing />} />
                         <Route path="/editor" element={<TextEditor />} />
+
                     </Routes>
 
                 </div>
