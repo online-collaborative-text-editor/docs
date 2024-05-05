@@ -9,10 +9,10 @@ const mockFiles = [
     {
         name: 'Doc1', content: 'Content of file 1', owner: 'owner1'
     },
-    { name: 'Doc2', content: 'Content of file 2', owner: 'owner2' },
-    { name: 'Doc3', content: 'Content of file 3', owner: 'owner3' },
-    { name: 'Doc4', content: 'Content of file 4', owner: 'owner4' },
-    { name: 'Doc5', content: 'Content of file 5', owner: 'owner5' },
+    { name: 'Doc2', content: 'Content of file 2', owner: 'owner2', contributers: ['heba', 'fatema', 'mohsen', 'hanzada'], created_at: '2021-09-01' },
+    { name: 'Doc3', content: 'Content of file 3', owner: 'owner3', contributers: ['heba', 'fatema', 'mohsen', 'hanzada'], created_at: '2021-09-01' },
+    { name: 'Doc4', content: 'Content of file 4', owner: 'owner4', contributers: ['heba', 'fatema', 'mohsen', 'hanzada'], created_at: '2021-09-01' },
+    { name: 'Doc5', content: 'Content of file 5', owner: 'owner5', contributers: ['heba', 'fatema', 'mohsen', 'hanzada'], created_at: '2021-09-01' },
     { name: 'Doc6', content: 'Content of file 6', owner: 'owner6' },
     { name: 'Doc7', content: 'Content of file 7', owner: 'owner7' },
     { name: 'Doc8', content: 'Content of file 8', owner: 'owner8' },
