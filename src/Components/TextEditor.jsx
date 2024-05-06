@@ -28,19 +28,16 @@ const TextEditor = () => {
 
     const file = location.state?.file;
     let page = location.state?.page;
-    console.log("inside editor ya heba ");
-    if (file == null || page == null) {
-        page = "created";
-    }
+
     useEffect(() => {
-        if (page != "created") {
-            const editor = document.querySelector('.ql-editor');
-            editor.innerHTML = file.content;
-            if (page === "viewed" && editor) {
-                editor.setAttribute('contenteditable', 'false');
-                editor.style.backgroundColor = 'lightgrey';
-            }
+
+        const editor = document.querySelector('.ql-editor');
+        editor.innerHTML = file.content;
+        if (page === "viewed" && editor) {
+            editor.setAttribute('contenteditable', 'false');
+            editor.style.backgroundColor = 'lightgrey';
         }
+
     }, [page, file])
     const wrapperRef = useCallback((wrapper) => {
         if (wrapper == null) return
@@ -64,7 +61,9 @@ const TextEditor = () => {
 
         <div>
 
-            <AppBar name={page != "created" ? file.name : null} page={page} />
+            <AppBar
+                name={file?.name ? file.name : null}
+                page={page} />
 
             <div id="editorcontainer" ref={wrapperRef}></div>;
             <form id="form" onSubmit={handleSubmit} >

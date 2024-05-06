@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import docIcon2 from '../icons/docIcon2.png';
 import AppBar from './AppBar';
@@ -44,11 +45,12 @@ let mockFiles = [
 ];
 const mockUser = "heba";
 let infoModalOpen = true;
+
 const DashBoard = () => {
+
     const [currentDashboardPage, setCurrentDashboardPage] = useState('all')
     const location = useLocation();
-
-    const AppbarSelectedPage = location.state.AppbarSelectedPage
+    const AppbarSelectedPage = location.state?.AppbarSelectedPage ? location.state.AppbarSelectedPage : currentDashboardPage;
     console.log("inside dashboard now , AppbarSelectedPage passed from the appBar is :");
     console.log(AppbarSelectedPage);
     ///////////////////////////// STATES ///////////////////////////////////////
@@ -63,7 +65,9 @@ const DashBoard = () => {
     useEffect(() => { setCurrentDashboardPage(AppbarSelectedPage) }, [AppbarSelectedPage]);
     const navigate = useNavigate();
     const handleFileClick = (file) => {
-        navigate('/editor', { state: { file, page: "owned" } });
+        if (currentDashboardPage == 'created')
+            file = { name: "untitled", content: "", owner: mockUser };
+        navigate('/editor', { state: { file, page: currentDashboardPage } });
     }
     ///////////////////////////// HANDLE DELETE ///////////////////////////////////////
     const handleDelete = (file) => {
@@ -103,7 +107,17 @@ const DashBoard = () => {
         setSelectedFile(prevFile => ({ ...prevFile, name: newName })); // Update selectedFile with the new name
         setRenderKey(prevKey => prevKey + 1); // Update renderKey to force re-render
     }
-
+    const filteredFiles = mockFiles.filter(file => {
+        if (AppbarSelectedPage === 'owned') {
+            return file.owner === mockUser;
+        } else if (AppbarSelectedPage === 'edited') {
+            return file.isEditable === true;
+        } else if (AppbarSelectedPage === 'viewed') {
+            return file.isEditable === false;
+        } else {
+            return true; // 'all' page, render all files
+        }
+    });
     ///////////////////////////// RENDER ////////////////////////////////////////////
     return (
         <div>
@@ -112,7 +126,7 @@ const DashBoard = () => {
 
             />
             <div className="docs-container">
-                {mockFiles.map((file, index) => (
+                {filteredFiles.map((file, index) => (
                     <div key={index} className="card">
                         <div className="file-info" onClick={() => handleFileClick(file)}>
                             <img src={docIcon2} alt="Doc icon" />
@@ -120,9 +134,9 @@ const DashBoard = () => {
                         </div>
                         <div className="icon-container">
                             <img src={info_Icon} alt="Info icon" onClick={() => handleInfo(file)} />
-                            <img src={rename_Icon} alt="Rename icon" onClick={() => handleRename(file)} />
+                            {file.isEditable ? <img src={rename_Icon} alt="Rename icon" onClick={() => handleRename(file)} /> : null}
 
-                            <img src={delete_Icon} alt="Delete icon" onClick={() => handleDelete(file)} />
+                            {file.isEditable ? < img src={delete_Icon} alt="Delete icon" onClick={() => handleDelete(file)} /> : null}
                         </div>
                     </div>
                 ))}
