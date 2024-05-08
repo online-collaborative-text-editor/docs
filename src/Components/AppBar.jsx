@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AnimatedH1 from './AnimatedH1';
-import Font from 'react-font'
+
 const AppBar = (props) => {
     const currentDashboardPage = props.currentDashboardPage ? props.currentDashboardPage : "all";
     const name = props.name;
@@ -36,7 +36,7 @@ const AppBar = (props) => {
     }
     ////////////////////////////RETURN STATEMENT////////////////////////////
     return (
-        <Font family="Roboto" weight={100}>
+        <div>
             <div className='appbar'>
                 {name ? <AnimatedH1>{name}</AnimatedH1> : null}
                 {currentDashboardPage === "owned" && !name ? <AnimatedH1>My files</AnimatedH1> : null}
@@ -52,7 +52,7 @@ const AppBar = (props) => {
                     {currentDashboardPage !== "all" && !name ? <button onClick={handleAllClick}>All</button> : null}
                 </div>
             </div>
-        </Font>
+        </div>
     );
 }
 
