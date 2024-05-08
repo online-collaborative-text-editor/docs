@@ -333,3 +333,57 @@ body {
 .file-name {
   display: inline-block;
 }
+.permissions-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.permissions-container label {
+    margin-right: 10px;
+}
+
+.permission-checkbox {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+
+
+
+
+
+
+
+
+.info-modal-content-share {
+    background-color: #fff;
+    padding: 50px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 50%;
+    height : 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-box-share {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.permissions-container-share {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.permission-checkbox-share {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}

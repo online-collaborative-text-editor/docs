@@ -1,13 +1,16 @@
 
 import React, { useEffect } from 'react';
-import docIcon2 from '../icons/docIcon2.png';
+import docIcon2 from '../icons/docIcon2.png'; 
+import document_icon from '../icons/document.png';
 import AppBar from './AppBar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useRef } from 'react';
 import delete_Icon from '../icons/delete_Icon.png';
 import info_Icon from '../icons/info_Icon.png';
 import rename_Icon from '../icons/rename_Icon.png';
-import Footer from './Footer';
+import Footer from './Footer'; 
+import share from '../icons/share.png'; 
+import deleteICON from '../icons/deleteICON.png'
 const saveButtonStyle = {
 
     boxSizing: 'border-box',
@@ -60,7 +63,7 @@ const DashBoard = () => {
     const [selectedFile, setSelectedFile] = useState(null); // State variable to store selected file
     const renameInputRef = useRef(null); // Create a ref for the input field
     const [renderKey, setRenderKey] = useState(0); // State variable to force re-render
-
+    const [shareModalOpen, setShareModalOpen] = useState(false);
 
     useEffect(() => { setCurrentDashboardPage(AppbarSelectedPage) }, [AppbarSelectedPage]);
     const navigate = useNavigate();
@@ -100,6 +103,20 @@ const DashBoard = () => {
     const handleRename = (file) => {
         setSelectedFile(file); // Set the selected file
         setRenameModalOpen(true); // Open the info modal
+    } 
+    ///////////////////////////// HANDLE SHARE /////////////////////////////////////// 
+    const handleShare = (file) => {
+        setSelectedFile(file); 
+        console.log("Sharing file: ", file);  
+        setShareModalOpen(true); 
+
+        
+
+    }   
+    ///////////////////////////// HANDLE CLOSE  RENAME ///////////////////////////////////////   
+    const handleCloseShareModal = () => {
+        setShareModalOpen(false); 
+        setRenderKey(prevKey => prevKey + 1);
     }
     const handleCloseRenameModal = () => {
         setRenameModalOpen(false);
@@ -129,14 +146,16 @@ const DashBoard = () => {
                 {filteredFiles.map((file, index) => (
                     <div key={index} className="card">
                         <div className="file-info" onClick={() => handleFileClick(file)}>
-                            <img src={docIcon2} alt="Doc icon" />
+                            <img src={document_icon} alt="Doc icon" />
                             <h2>{file.name}</h2>
                         </div>
                         <div className="icon-container">
                             <img src={info_Icon} alt="Info icon" onClick={() => handleInfo(file)} />
                             {file.isEditable ? <img src={rename_Icon} alt="Rename icon" onClick={() => handleRename(file)} /> : null}
 
-                            {file.isEditable ? < img src={delete_Icon} alt="Delete icon" onClick={() => handleDelete(file)} /> : null}
+                            {file.isEditable ? < img src={deleteICON} alt="Delete icon" onClick={() => handleDelete(file)} /> : null}
+                            {file.isEditable ? <img src={share} alt="Share icon" onClick={() => handleShare(file)} /> : null}
+
                         </div>
                     </div>
                 ))}
@@ -198,7 +217,28 @@ const DashBoard = () => {
                         <button onClick={handleCloseRenameModal} style={saveButtonStyle}>Rename</button>
                     </div>
                 </div>
-            )}
+            )} 
+            {shareModalOpen && ( 
+    <div className="info-modal">
+        <div className="info-modal-content-share"> 
+       
+            <div className="input-box-share">
+                <input ref={renameInputRef} type="text" defaultValue={selectedFile.name} required className="renaming-input-box" />
+            </div> 
+          
+            <div className="permissions-container-share">
+                <label htmlFor="editor">Editor</label>
+                <input type="checkbox" id="editor" name="editor" className="permission-checkbox-share" />
+                <label htmlFor="viewer">Viewer</label>
+                <input type="checkbox" id="viewer" name="viewer" className="permission-checkbox-share" />
+            </div>
+            <button onClick={handleCloseShareModal} style={saveButtonStyle}>Share</button> 
+            <br></br>
+            <button onClick={handleCloseShareModal} style={saveButtonStyle}>Cancel</button>
+        </div>
+    </div>
+)} 
+
 
             <Footer></Footer>
         </div>
