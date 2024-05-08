@@ -1,7 +1,7 @@
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box'; // Import Box component from Material-UI 
-import Font, { Text } from 'react-font'
+
 
 function Footer(props) {
     return (
@@ -16,7 +16,7 @@ function Footer(props) {
             <Typography variant="body2" color="text.secondary">
                 {'Copyright © '}
                 <Link color="inherit" href="https://mui.com/">
-                    <Font family="Roboto"> ahmad we fatouma w zoza w habhoba</Font>
+                    <p> ahmad we fatouma w zoza w habhoba</p>
                 </Link>{' '}
                 {new Date().getFullYear()}
                 {'.'}

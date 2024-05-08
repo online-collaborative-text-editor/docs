@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Switch } from 'react-router-dom
 import DashBoard from './DashBoard';
 import Login from './Login';
 import SignUp from './SignUp';
-
+import { v4 as uuid } from 'uuid';
 import TextEditor from './TextEditor';
 
 function App() {
