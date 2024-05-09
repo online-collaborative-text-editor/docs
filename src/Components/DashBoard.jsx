@@ -125,10 +125,13 @@ const DashBoard = () => {
   const [DeleteModalOpen, setDeleteModalOpen] = useState(false); // State variable for info modal
   const [RenameModalOpen, setRenameModalOpen] = useState(false); // State variable for info modal
   const [selectedFile, setSelectedFile] = useState(null); // State variable to store selected file
-  const renameInputRef = useRef(null); // Create a ref for the input field
   const [renderKey, setRenderKey] = useState(0); // State variable to force re-render
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [files, setFiles] = useState([]);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const renameInputRef = useRef(null); // Create a ref for the input field
+  const shareInputRef = useRef(null);
+  const checkBoxEditorRef = useRef(null);
 
   const fetchData = async (type) => {
     console.log(AppbarSelectedPage);
@@ -143,9 +146,9 @@ const DashBoard = () => {
           },
         }
       );
-
       if (response.ok) {
-        const data = await response.json();
+          const data = await response.json();
+          console.log(data);
         return data;
       } else {
         console.log("Failed to fetch data");
@@ -158,15 +161,21 @@ const DashBoard = () => {
   };
 
   useEffect(() => {
+    console.log('iam inside useeffect');
     const fetchDataAndSetFiles = async () => {
       const fetchedData = await fetchData(AppbarSelectedPage);
       if (fetchedData) {
         setFiles(fetchedData);
       }
+
     };
+    if (shouldRefetch) {
+        fetchDataAndSetFiles();
+        setShouldRefetch(false); 
+      }
 
     fetchDataAndSetFiles();
-  }, [AppbarSelectedPage]);
+  }, [AppbarSelectedPage,shouldRefetch]);
 
   useEffect(() => {
     setCurrentDashboardPage(AppbarSelectedPage);
@@ -181,12 +190,35 @@ const DashBoard = () => {
   const handleDelete = (file) => {
     setDeleteModalOpen(true);
     setSelectedFile(file);
-    files = files.filter((f) => f.documentName !== file.documentName);
+    //files = files.filter((f) => f.documentName !== file.documentName);
   };
-  const handleCloseDeleteModal = () => {
-    setSelectedFile(null); // Clear the selected file
-    setDeleteModalOpen(false); // Close the info modal
-    setRenderKey((prevKey) => prevKey + 1); // Update renderKey to force re-render
+  const handleCloseDeleteModal = async (file) => {
+    setSelectedFile(null); 
+    setDeleteModalOpen(false); 
+    try {
+
+        const response = await fetch(
+          `http://localhost:8080/api/files/delete/${file.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + localStorage.getItem("token"),
+            },  
+          }
+        );
+  
+        if (response.ok) {
+          console.log('File deleted');
+          setShouldRefetch(true);
+        } else {
+          console.log("Failed to delete");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        return null;
+      }
   };
   const handleCloseCancelModal = () => {
     setSelectedFile(null); // Clear the selected file
@@ -204,9 +236,12 @@ const DashBoard = () => {
     setRenderKey((prevKey) => prevKey + 1); // Update renderKey to force re-render
   };
   ///////////////////////////// HANDLE RENAME ///////////////////////////////////////
-  const handleRename = (file) => {
+
+  const handleRename = async (file) => {
+    console.log('inside handleRename');
     setSelectedFile(file); // Set the selected file
     setRenameModalOpen(true); // Open the info modal
+    
   };
   ///////////////////////////// HANDLE SHARE ///////////////////////////////////////
   const handleShare = (file) => {
@@ -215,16 +250,72 @@ const DashBoard = () => {
     setShareModalOpen(true);
   };
   ///////////////////////////// HANDLE CLOSE  RENAME ///////////////////////////////////////
-  const handleCloseShareModal = () => {
+  const handleCloseShareModal = async (file) => {
+    console.log('inside handleCloseShareModal');
+    console.log(file.id);
+    console.log(shareInputRef.current.value);
+    console.log(checkBoxEditorRef.current.checked);
     setShareModalOpen(false);
+    try {
+
+        const response = await fetch(
+          `http://localhost:8080/api/files/share/${file.id}?username=${shareInputRef.current.value}&permission=${checkBoxEditorRef.current.checked ? "VIEWER" : "VIEWER"}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + localStorage.getItem("token"),
+            },  
+          }
+        );
+  
+        if (response.ok) {
+          console.log('File shared');
+          setShouldRefetch(true);
+        } else {
+          console.log("Failed to share");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        return null;
+      }
     setRenderKey((prevKey) => prevKey + 1);
   };
-  const handleCloseRenameModal = () => {
+  const handleCloseRenameModal = async (file) => {
     setRenameModalOpen(false);
-    const newName = renameInputRef.current.value;
-    setSelectedFile((prevFile) => ({ ...prevFile, name: newName })); // Update selectedFile with the new name
-    setRenderKey((prevKey) => prevKey + 1); // Update renderKey to force re-render
+    
+    try {
+
+        const response = await fetch(
+          `http://localhost:8080/api/files/rename/${file.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + localStorage.getItem("token"),
+            },
+            body: JSON.stringify({
+                newDocumentName: renameInputRef.current.value,
+            })
+          }
+        );
+  
+        if (response.ok) {
+          console.log('File renamed');
+          setShouldRefetch(true);
+        } else {
+          console.log("Failed to rename");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        return null;
+      }
+    setRenderKey((prevKey) => prevKey + 1); 
   };
+
+  const isEditable=true;
 
   ///////////////////////////// RENDER ////////////////////////////////////////////
   return (
@@ -243,7 +334,7 @@ const DashBoard = () => {
                 alt="Info icon"
                 onClick={() => handleInfo(file)}
               />
-              {file.isEditable ? (
+              {isEditable ? (
                 <img
                   src={rename_Icon}
                   alt="Rename icon"
@@ -251,14 +342,14 @@ const DashBoard = () => {
                 />
               ) : null}
 
-              {file.isEditable ? (
+              {isEditable ? (
                 <img
                   src={deleteICON}
                   alt="Delete icon"
                   onClick={() => handleDelete(file)}
                 />
               ) : null}
-              {file.isEditable ? (
+              {isEditable ? (
                 <img
                   src={share}
                   alt="Share icon"
@@ -307,7 +398,7 @@ const DashBoard = () => {
             <br></br>
             <br></br>
 
-            <button onClick={handleCloseDeleteModal} style={saveButtonStyle}>
+            <button onClick={()=>handleCloseDeleteModal(selectedFile)} style={saveButtonStyle}>
               Delete
             </button>
             <br></br>
@@ -330,7 +421,7 @@ const DashBoard = () => {
               />
             </div>
 
-            <button onClick={handleCloseRenameModal} style={saveButtonStyle}>
+            <button onClick={()=>handleCloseRenameModal(selectedFile)} style={saveButtonStyle}>
               Rename
             </button>
           </div>
@@ -341,7 +432,7 @@ const DashBoard = () => {
           <div className="info-modal-content-share">
             <div className="input-box-share">
               <input
-                ref={renameInputRef}
+                ref={shareInputRef}
                 type="text"
                 defaultValue={selectedFile.documentName}
                 required
@@ -352,6 +443,7 @@ const DashBoard = () => {
             <div className="permissions-container-share">
               <label htmlFor="editor">Editor</label>
               <input
+              ref={checkBoxEditorRef}
                 type="checkbox"
                 id="editor"
                 name="editor"
@@ -365,7 +457,7 @@ const DashBoard = () => {
                 className="permission-checkbox-share"
               />
             </div>
-            <button onClick={handleCloseShareModal} style={saveButtonStyle}>
+            <button onClick={()=>handleCloseShareModal(selectedFile)} style={saveButtonStyle}>
               Share
             </button>
             <br></br>
