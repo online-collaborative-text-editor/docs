@@ -341,14 +341,14 @@ const DashBoard = () => {
                 />
               ) : null}
 
-              {file.permission == "EDITOR" ? (
+              {AppbarSelectedPage == "owned" ? (
                 <img
                   src={deleteICON}
                   alt="Delete icon"
                   onClick={() => handleDelete(file)}
                 />
               ) : null}
-              {file.permission == "EDITOR" ? (
+              {(file.permission == "EDITOR"|| AppbarSelectedPage !== "owned") ? (
                 <img
                   src={share}
                   alt="Share icon"
