@@ -111,7 +111,7 @@ const mockUser = "heba";
 let infoModalOpen = true;
 
 const DashBoard = () => {
-  const [currentDashboardPage, setCurrentDashboardPage] = useState("owned");
+  const [currentDashboardPage, setCurrentDashboardPage] = useState("all");
   const location = useLocation();
   const AppbarSelectedPage = location.state?.AppbarSelectedPage
     ? location.state.AppbarSelectedPage
@@ -315,7 +315,6 @@ const DashBoard = () => {
     setRenderKey((prevKey) => prevKey + 1); 
   };
 
-  const isEditable=true;
 
   ///////////////////////////// RENDER ////////////////////////////////////////////
   return (
@@ -334,7 +333,7 @@ const DashBoard = () => {
                 alt="Info icon"
                 onClick={() => handleInfo(file)}
               />
-              {isEditable ? (
+              {file.permission == "EDITOR" ? (
                 <img
                   src={rename_Icon}
                   alt="Rename icon"
@@ -342,14 +341,14 @@ const DashBoard = () => {
                 />
               ) : null}
 
-              {isEditable ? (
+              {file.permission == "EDITOR" ? (
                 <img
                   src={deleteICON}
                   alt="Delete icon"
                   onClick={() => handleDelete(file)}
                 />
               ) : null}
-              {isEditable ? (
+              {file.permission == "EDITOR" ? (
                 <img
                   src={share}
                   alt="Share icon"
@@ -370,12 +369,12 @@ const DashBoard = () => {
             <p>Created At: {selectedFile.createdAt}</p>
             <p>Last modified: {selectedFile.lastModifiedAt}</p>
             <p>Filename: {selectedFile.documentName}</p>
-            {selectedFile.contributers && ( // Check if contributors is defined
+            {selectedFile.contributors && ( // Check if contributors is defined
               <div>
                 <p>Contributors:</p>
                 <ul>
-                  {selectedFile.contributers.map((contributers, index) => (
-                    <li key={index}>{contributers}</li>
+                  {selectedFile.contributors.map((contributer, index) => (
+                    <li key={index}>{contributer}</li>
                   ))}
                 </ul>
               </div>
