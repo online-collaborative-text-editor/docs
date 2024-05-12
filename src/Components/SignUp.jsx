@@ -35,7 +35,7 @@ const SignUp = () => {
                 }
             });
             //redirect to the dashboard page 
-            navigate('/login');
+            navigate('/');
         } else {
             console.log('Passwords do not match');
         }

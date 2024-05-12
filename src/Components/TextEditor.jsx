@@ -5,12 +5,7 @@ import AppBar from './AppBar';
 import { useLocation } from "react-router-dom";
 import { useState } from 'react';
 import io from 'socket.io-client';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Redirect
-} from 'react-router-dom';
+import { Node, CRDT } from '../CRDT.js';
 const saveButtonStyle = {
 
     boxSizing: 'border-box',
@@ -32,16 +27,17 @@ const saveButtonStyle = {
 
 const mockDatabase = [];
 const TextEditor = () => {
+    let crdt_client = new CRDT();
     const [socket, setSocket] = useState();
     const [quill, setQuill] = useState();
-    useEffect(() => {
-        const s = io("http://localhost:3001");//server port 
-        setSocket(s);
-        console.log("connected to server");
-        return () => {
-            s.disconnect();
-        }
-    }, []);
+    // useEffect(() => {
+    //     const s = io("http://localhost:3001");//server port 
+    //     setSocket(s);
+    //     console.log("connected to server");
+    //     return () => {
+    //         s.disconnect();
+    //     }
+    // }, []);
 
     const location = useLocation();
 
@@ -51,26 +47,46 @@ const TextEditor = () => {
     useEffect(() => {
 
         const editor = document.querySelector('.ql-editor');
-        editor.innerHTML = file.content;
+        // editor.innerHTML = file.content;
         if (page === "viewed" && editor) {
             editor.setAttribute('contenteditable', 'false');
             editor.style.backgroundColor = 'lightgrey';
         }
 
     }, [page, file])
-    //send changes to server
-    useEffect(() => {
-        if (quill == null || socket == null) return
-        const handler = (delta, oldDelta, source) => {
-            if (source !== 'user') return
-            socket.emit('send-changes', delta)
-        }
-        quill?.on('text-change', handler)//event listener 
-        return () => {//cleanup 
-            quill?.off('text-change', handler)
-        }
 
-    }, [quill, socket])
+    useEffect(() => {
+        if (quill == null) return;
+
+        const handler = (delta, oldDelta, source) => {
+            if (source !== 'user') return;
+            console.log("delta")
+            console.log(delta)
+            const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
+            const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
+            console.log(index)
+            console.log(text)
+
+            if (delta.ops.length > 0) {
+                if (text) {
+                    console.log("yarab")
+                    let node = new Node(text);
+                    crdt_client.insertDisplayIndex(node, index);
+                } else {
+                    console.log("delete")
+                    crdt_client.deleteDisplayIndex(index + 1);
+                }
+            }
+
+            console.log("crdt client :")
+            console.log(crdt_client)
+        }
+        quill?.on('text-change', handler);
+        return () => {
+            quill?.off('text-change', handler);
+        }
+    }, [quill]);
+
     //recieve changes from server 
     useEffect(() => {
         if (quill == null || socket == null) return
@@ -121,6 +137,8 @@ const TextEditor = () => {
 
 
     )
+
 };
+
 
 export default TextEditor;
