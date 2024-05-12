@@ -147,8 +147,8 @@ const DashBoard = () => {
         }
       );
       if (response.ok) {
-          const data = await response.json();
-          console.log(data);
+        const data = await response.json();
+        console.log(data);
         return data;
       } else {
         console.log("Failed to fetch data");
@@ -170,12 +170,12 @@ const DashBoard = () => {
 
     };
     if (shouldRefetch) {
-        fetchDataAndSetFiles();
-        setShouldRefetch(false); 
-      }
+      fetchDataAndSetFiles();
+      setShouldRefetch(false);
+    }
 
     fetchDataAndSetFiles();
-  }, [AppbarSelectedPage,shouldRefetch]);
+  }, [AppbarSelectedPage, shouldRefetch]);
 
   useEffect(() => {
     setCurrentDashboardPage(AppbarSelectedPage);
@@ -193,32 +193,32 @@ const DashBoard = () => {
     //files = files.filter((f) => f.documentName !== file.documentName);
   };
   const handleCloseDeleteModal = async (file) => {
-    setSelectedFile(null); 
-    setDeleteModalOpen(false); 
+    setSelectedFile(null);
+    setDeleteModalOpen(false);
     try {
 
-        const response = await fetch(
-          `http://localhost:8080/api/files/delete/${file.id}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + localStorage.getItem("token"),
-            },  
-          }
-        );
-  
-        if (response.ok) {
-          console.log('File deleted');
-          setShouldRefetch(true);
-        } else {
-          console.log("Failed to delete");
-          return null;
+      const response = await fetch(
+        `http://localhost:8080/api/files/delete/${file.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token"),
+          },
         }
-      } catch (error) {
-        console.error("Error:", error);
+      );
+
+      if (response.ok) {
+        console.log('File deleted');
+        setShouldRefetch(true);
+      } else {
+        console.log("Failed to delete");
         return null;
       }
+    } catch (error) {
+      console.error("Error:", error);
+      return null;
+    }
   };
   const handleCloseCancelModal = () => {
     setSelectedFile(null); // Clear the selected file
@@ -241,7 +241,7 @@ const DashBoard = () => {
     console.log('inside handleRename');
     setSelectedFile(file); // Set the selected file
     setRenameModalOpen(true); // Open the info modal
-    
+
   };
   ///////////////////////////// HANDLE SHARE ///////////////////////////////////////
   const handleShare = (file) => {
@@ -258,61 +258,61 @@ const DashBoard = () => {
     setShareModalOpen(false);
     try {
 
-        const response = await fetch(
-          `http://localhost:8080/api/files/share/${file.id}?username=${shareInputRef.current.value}&permission=${checkBoxEditorRef.current.checked ? "VIEWER" : "VIEWER"}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + localStorage.getItem("token"),
-            },  
-          }
-        );
-  
-        if (response.ok) {
-          console.log('File shared');
-          setShouldRefetch(true);
-        } else {
-          console.log("Failed to share");
-          return null;
+      const response = await fetch(
+        `http://localhost:8080/api/files/share/${file.id}?username=${shareInputRef.current.value}&permission=${checkBoxEditorRef.current.checked ? "EDITOR" : "VIEWER"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token"),
+          },
         }
-      } catch (error) {
-        console.error("Error:", error);
+      );
+
+      if (response.ok) {
+        console.log('File shared');
+        setShouldRefetch(true);
+      } else {
+        console.log("Failed to share");
         return null;
       }
+    } catch (error) {
+      console.error("Error:", error);
+      return null;
+    }
     setRenderKey((prevKey) => prevKey + 1);
   };
   const handleCloseRenameModal = async (file) => {
     setRenameModalOpen(false);
-    
+
     try {
 
-        const response = await fetch(
-          `http://localhost:8080/api/files/rename/${file.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + localStorage.getItem("token"),
-            },
-            body: JSON.stringify({
-                newDocumentName: renameInputRef.current.value,
-            })
-          }
-        );
-  
-        if (response.ok) {
-          console.log('File renamed');
-          setShouldRefetch(true);
-        } else {
-          console.log("Failed to rename");
-          return null;
+      const response = await fetch(
+        `http://localhost:8080/api/files/rename/${file.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            newDocumentName: renameInputRef.current.value,
+          })
         }
-      } catch (error) {
-        console.error("Error:", error);
+      );
+
+      if (response.ok) {
+        console.log('File renamed');
+        setShouldRefetch(true);
+      } else {
+        console.log("Failed to rename");
         return null;
       }
-    setRenderKey((prevKey) => prevKey + 1); 
+    } catch (error) {
+      console.error("Error:", error);
+      return null;
+    }
+    setRenderKey((prevKey) => prevKey + 1);
   };
 
 
@@ -333,7 +333,7 @@ const DashBoard = () => {
                 alt="Info icon"
                 onClick={() => handleInfo(file)}
               />
-              {file.permission == "EDITOR" ? (
+              {file.permission == "EDITOR" || file.permission == "OWNER" ? (
                 <img
                   src={rename_Icon}
                   alt="Rename icon"
@@ -341,14 +341,14 @@ const DashBoard = () => {
                 />
               ) : null}
 
-              {AppbarSelectedPage == "owned" ? (
+              {file.permission == "OWNER" ? (
                 <img
                   src={deleteICON}
                   alt="Delete icon"
                   onClick={() => handleDelete(file)}
                 />
               ) : null}
-              {(file.permission == "EDITOR"|| AppbarSelectedPage !== "owned") ? (
+              {(file.permission == "EDITOR" || file.permission == "OWNER") ? (
                 <img
                   src={share}
                   alt="Share icon"
@@ -397,7 +397,7 @@ const DashBoard = () => {
             <br></br>
             <br></br>
 
-            <button onClick={()=>handleCloseDeleteModal(selectedFile)} style={saveButtonStyle}>
+            <button onClick={() => handleCloseDeleteModal(selectedFile)} style={saveButtonStyle}>
               Delete
             </button>
             <br></br>
@@ -420,7 +420,7 @@ const DashBoard = () => {
               />
             </div>
 
-            <button onClick={()=>handleCloseRenameModal(selectedFile)} style={saveButtonStyle}>
+            <button onClick={() => handleCloseRenameModal(selectedFile)} style={saveButtonStyle}>
               Rename
             </button>
           </div>
@@ -442,7 +442,7 @@ const DashBoard = () => {
             <div className="permissions-container-share">
               <label htmlFor="editor">Editor</label>
               <input
-              ref={checkBoxEditorRef}
+                ref={checkBoxEditorRef}
                 type="checkbox"
                 id="editor"
                 name="editor"
@@ -456,7 +456,7 @@ const DashBoard = () => {
                 className="permission-checkbox-share"
               />
             </div>
-            <button onClick={()=>handleCloseShareModal(selectedFile)} style={saveButtonStyle}>
+            <button onClick={() => handleCloseShareModal(selectedFile)} style={saveButtonStyle}>
               Share
             </button>
             <br></br>

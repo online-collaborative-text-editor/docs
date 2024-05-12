@@ -62,6 +62,14 @@ const AppBar = (props) => {
     console.log("All clicked");
     navigate("/dashboard", { state: { AppbarSelectedPage: "all" } });
   };
+  ////////////////////////////LOGOUT CLICK HANDLER//////////////////////////// 
+  const handleLogoutClick = () => {
+    console.log("Logout clicked");
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+  //
+
   ////////////////////////////RETURN STATEMENT////////////////////////////
   return (
     <div>
@@ -98,6 +106,7 @@ const AppBar = (props) => {
           {currentDashboardPage !== "all" && !name ? (
             <button onClick={handleAllClick}>All</button>
           ) : null}
+          <button onClick={handleLogoutClick}>Logout</button>
         </div>
       </div>
     </div>
