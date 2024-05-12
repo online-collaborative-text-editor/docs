@@ -66,6 +66,7 @@ const AppBar = (props) => {
   const handleLogoutClick = () => {
     console.log("Logout clicked");
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
     navigate("/");
   };
   //

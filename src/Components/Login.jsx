@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import { TbUserHeart } from "react-icons/tb";
 import { TbPasswordFingerprint } from "react-icons/tb";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 //impoer local storage 
 
 const Login = () => {
@@ -51,33 +51,33 @@ const Login = () => {
                 console.log('User Logged In');
                 response.json().then(data => {
                     console.log("response data is:", data);
-                    localStorage.setItem('token', data.accessToken); 
-                    localStorage.setItem('username', data.username); 
+                    localStorage.setItem('token', data.accessToken);
+                    localStorage.setItem('username', document.getElementById('username').value);
                     navigate('/dashboard');
 
                     // TODO: at logout, remove the token and username from local storage
                 });
-              
+
             } else {
                 console.log('User Not Logged In');
             }
         }).catch(error => {
             console.error('Error:', error);
         });
-        
 
-             
-          
-      
+
+
+
+
 
     }
-/* */
+    /* */
     return (
         <div className='wrapper'>
             <form action="POST" onSubmit={handleSubmit} >
                 <h1>Login</h1>
                 <div className="input-box">
-                    <input type="text" placeholder="Username" required />
+                    <input type="text" placeholder="Username" required id="username" />
                     <TbUserHeart className='icon' />
                 </div>
                 <div className="input-box">

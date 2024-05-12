@@ -31,7 +31,7 @@ const TextEditor = () => {
 
     const file = location.state?.file;
     let page = location.state?.page;
-    const docId = location.state?.id;
+    const docId = location.state?.docId;
 
     console.log("file is", file);
     console.log("page is", page);
@@ -98,57 +98,45 @@ const TextEditor = () => {
         }
     }, [quill]);
 
-}, [quill, socket])
-    //recieve changes from server 
-    useEffect(() => {
-        if (quill == null || socket == null) return
-        const handler = (delta, oldDelta, source) => {
-            quill.updateContents(delta)
-        }
-        socket?.on('receive-changes', handler)//event listener 
-        return () => {//cleanup 
-            socket?.off('receive-changes', handler)
-        }
 
-    }, [quill, socket])
-const wrapperRef = useCallback((wrapper) => {
-    if (wrapper == null) return
-    wrapper.innerHTML = ""
+    const wrapperRef = useCallback((wrapper) => {
+        if (wrapper == null) return
+        wrapper.innerHTML = ""
 
-    const editor = document.createElement('div')
-    wrapper.append(editor)
-    const q = new Quill(editor, { theme: 'snow' })
-    setQuill(q);
-}, [])
-const handleSubmit = (e) => {
-    e.preventDefault();
-    const editor = document.querySelector('.ql-editor');
-    const content = editor.innerHTML;
-    const fileName = prompt('Enter the file name', "untitled");
-    mockDatabase.push({ name: fileName, content: content });
-    console.log(mockDatabase);
-    //TODO:http request to save the content 
+        const editor = document.createElement('div')
+        wrapper.append(editor)
+        const q = new Quill(editor, { theme: 'snow' })
+        setQuill(q);
+    }, [])
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const editor = document.querySelector('.ql-editor');
+        const content = editor.innerHTML;
+        const fileName = prompt('Enter the file name', "untitled");
+        mockDatabase.push({ name: fileName, content: content });
+        console.log(mockDatabase);
+        //TODO:http request to save the content 
 
-}
-return (
+    }
+    return (
 
-    <div>
+        <div>
 
-        <AppBar
-            name={file?.name ? file.name : null}
-            page={page} />
+            <AppBar
+                name={file?.name ? file.name : null}
+                page={page} />
 
-        <div id="editorcontainer" ref={wrapperRef}></div>;
-        <form id="form" onSubmit={handleSubmit} >
-            <div style={{ textAlign: 'center', margin: '2rem' }}></div>
-            {page != "viewed" ? <button type="submit" style={saveButtonStyle}>Save</button> : null}
+            <div id="editorcontainer" ref={wrapperRef}></div>;
+            <form id="form" onSubmit={handleSubmit} >
+                <div style={{ textAlign: 'center', margin: '2rem' }}></div>
+                {page != "viewed" ? <button type="submit" style={saveButtonStyle}>Save</button> : null}
 
-        </form>
+            </form>
 
-    </div>
+        </div>
 
 
-)
+    )
 
 };
 
