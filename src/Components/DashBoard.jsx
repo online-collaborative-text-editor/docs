@@ -184,7 +184,7 @@ const DashBoard = () => {
   const handleFileClick = (file) => {
     if (currentDashboardPage == "created")
       file = { name: "untitled", content: "" };
-    navigate("/editor", { state: { file, page: currentDashboardPage } });
+    navigate("/editor", { state: { file, page: currentDashboardPage, docId: selectedFile.id } });
   };
   ///////////////////////////// HANDLE DELETE ///////////////////////////////////////
   const handleDelete = (file) => {

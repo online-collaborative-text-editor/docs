@@ -52,7 +52,10 @@ const Login = () => {
                 response.json().then(data => {
                     console.log("response data is:", data);
                     localStorage.setItem('token', data.accessToken); 
+                    localStorage.setItem('username', data.username); 
                     navigate('/dashboard');
+
+                    // TODO: at logout, remove the token and username from local storage
                 });
               
             } else {
