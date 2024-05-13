@@ -17,8 +17,10 @@ class CRDT {
     // When the server receives an insert event from a client, it inserts the node into the CRDT instance
     // When a client receives an insert event from the server, it inserts the node into the CRDT instance, it then calculates the display index from the position and displays the node at that index
     insertPosition(node) {
-
+        console.log("inside insertPosition")
         let arrayIndex = this.positionToArrayIndex(node.position);
+        console.log('arrayIndex', arrayIndex);
+        console.log("position", node.position);
         this.nodes.splice(arrayIndex, 0, node);
     }
 
@@ -66,9 +68,9 @@ class CRDT {
         for (let node of this.nodes) {
             if (!node.tombstone) {
                 if (count === displayIndex) {
-                    console.log("crdt", this.nodes)
-                    console.log('node', node);
-                    console.log('gomla tawila', this.nodes[this.nodes.indexOf(node) + 1]);
+                    // console.log("crdt", this.nodes)
+                    // console.log('node', node);
+                    // console.log('gomla tawila', this.nodes[this.nodes.indexOf(node) + 1]);
                     return (node.position + this.nodes[this.nodes.indexOf(node) + 1].position) / 2;
                 }
                 count++;
@@ -89,6 +91,20 @@ class CRDT {
         }
         return -1; // Invalid displayIndex
     }
+    //get the display index from the position 
+    get_PositionToDisplayIndex(node) {
+        let count = 0;
+        let position = node.position;
+        for (let node of this.nodes) {
+            if (!node.tombstone) {
+                if (node.position === position) {
+                    return count - 1;
+                }
+                count++;
+            }
+        }
+        return -1; // Invalid displayIndex
+    }
 }
 
 function testCRDT() {
@@ -99,7 +115,9 @@ function testCRDT() {
     // The client wrote a letter 'a' at display index 0
     // He stored it in his own CRDT instance
     let node = new Node('a');
+
     crdt_client.insertDisplayIndex(node, 0);
+
     console.assert(crdt_client.nodes[1].letter === 'a', 'Client insertDisplayIndex failed');
 
     // He sent the node to the server
@@ -129,10 +147,13 @@ function testCRDT() {
     // The other clients displayed the delete event at the display index calculated from the position
     crdt_client.deletePosition(node);
     console.assert(crdt_client.nodes[1].tombstone === true, 'Client deletePosition failed');
+    //test the position to display index
 
+
+    let displayIndex2 = crdt_client.get_PositionToDisplayIndex(node);
     // Cleanup the CRDT
     crdt_server.cleanUp();
+
     console.assert(crdt_server.nodes.length === 2, 'Server cleanUp failed');
 }
 export { CRDT, Node };
-// testCRDT();

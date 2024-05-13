@@ -22,11 +22,7 @@ const AppBar = (props) => {
     console.log("Edited clicked");
     navigate("/dashboard", { state: { AppbarSelectedPage: "edited", username } });
   };
-  ////////////////////////////VIEWED CLICK HANDLER////////////////////////////
-  const handleViewedClick = () => {
-    console.log("Viewed clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "viewed", username } });
-  };
+
   ////////////////////////////NEW CLICK HANDLER////////////////////////////
   const handleNewClick = () => {
     console.log("New clicked");
@@ -82,11 +78,9 @@ const AppBar = (props) => {
           <AnimatedH1>My files</AnimatedH1>
         ) : null}
         {currentDashboardPage === "edited" && !name ? (
-          <AnimatedH1>Editable files</AnimatedH1>
+          <AnimatedH1>Shared with me</AnimatedH1>
         ) : null}
-        {currentDashboardPage === "viewed" && !name ? (
-          <AnimatedH1>View only files</AnimatedH1>
-        ) : null}
+
         {currentDashboardPage === "created" && !name ? (
           <AnimatedH1>Create new file</AnimatedH1>
         ) : null}
@@ -98,16 +92,15 @@ const AppBar = (props) => {
             <button onClick={handleOwnedClick}>My owned documents</button>
           ) : null}
           {currentDashboardPage !== "edited" && !name ? (
-            <button onClick={handleEditClick}>Edited Docs</button>
+            <button onClick={handleEditClick}>Shared with me</button>
           ) : null}
-          {currentDashboardPage !== "viewed" && !name ? (
-            <button onClick={handleViewedClick}>Viewed Docs</button>
+
+
+          {currentDashboardPage !== "all" && !name ? (
+            <button onClick={handleAllClick}>All</button>
           ) : null}
           {currentDashboardPage !== "created" && !name ? (
             <button onClick={handleNewClick}>Create new</button>
-          ) : null}
-          {currentDashboardPage !== "all" && !name ? (
-            <button onClick={handleAllClick}>All</button>
           ) : null}
           <button onClick={handleLogoutClick}>Logout</button>
         </div>

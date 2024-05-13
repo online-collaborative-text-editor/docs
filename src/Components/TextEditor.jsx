@@ -34,11 +34,6 @@ const TextEditor = () => {
     const docId = location.state?.docId;
     const username = location.state?.username;
 
-    console.log("file is", file);
-    console.log("page is", page);
-    console.log("docId is", docId);
-    console.log("username is", username);
-
     let crdt_client = new CRDT();
     const [socket, setSocket] = useState();
     const [quill, setQuill] = useState();
@@ -73,41 +68,64 @@ const TextEditor = () => {
 
         const handler = (delta, oldDelta, source) => {
             if (source !== 'user') return;
-            console.log("delta")
-            console.log(delta)
+
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
-            console.log(index)
-            console.log(text)
+            console.log("delta in my page", delta)
 
             if (delta.ops.length > 0) {
                 if (text) {
+                    const newNode = new Node(text);
 
-
-
-                    const node = crdt_client.insertDisplayIndex(new Node(text), index);
-                    //emit socket event to the server to insert the node 
-                    console.log("before emmit")
+                    const is_bold = (delta.ops[1]?.attributes?.bold) ? delta.ops[1]?.attributes?.bold : delta.ops[0]?.attributes?.bold
+                    const is_italic = (delta.ops[1]?.attributes?.italic) ? delta.ops[1]?.attributes?.italic : delta.ops[0]?.attributes?.italic
+                    if (is_bold) {
+                        newNode.bold = true;
+                    }
+                    if (is_italic) {
+                        newNode.italic = true;
+                    }
+                    const node = crdt_client.insertDisplayIndex(newNode, index);
+                    console.log("client crdt:", crdt_client)
                     socket.emit('insert', node)
-                    console.log("passed emmit")
+
                 } else {
-                    console.log("delete")
+
                     const node = crdt_client.deleteDisplayIndex(index + 1);
-                    //emit socket event to the server to delete the node
+
                     socket.emit('delete', node);
-                    console.log("passed emmit")
+
                 }
+
             }
 
-            console.log("crdt client :")
-            console.log(crdt_client)
+
+            //console.log(crdt_client)
         }
+
         //listen to the server insert and delete events 
         socket.on('insert', (node) => {
             console.log("insert event from server:")
             console.log(node)
             crdt_client.insertPosition(node);
-
+            //insert the node in the quill editor 
+            const ops = [];
+            const retain = crdt_client.get_PositionToDisplayIndex(node) != 0 ? crdt_client.get_PositionToDisplayIndex(node) : null
+            const text = node.letter;
+            const bold = node.bold;
+            const italic = node.italic;
+            const attributes = {
+                bold: bold || null,
+                italic: italic || null
+            } ? { bold: bold, italic: italic } : null;
+            //new delta 
+            if (retain) {
+                ops.push({ retain: retain });
+            }
+            ops.push({ insert: text, attributes: attributes });
+            const delta = { ops: ops };
+            console.log("delta to update quill:", delta)
+            quill.updateContents(delta);
         });
         socket.on('delete', (node) => {
             console.log("delete event from server:")
