@@ -67,7 +67,7 @@ const TextEditor = () => {
     }, [page, file])
 
     useEffect(() => {
-        if (quill == null) return;
+        if (quill == null || socket == null) return;
 
         const handler = (delta, oldDelta, source) => {
             if (source !== 'user') return;
@@ -80,12 +80,20 @@ const TextEditor = () => {
 
             if (delta.ops.length > 0) {
                 if (text) {
-                    console.log("yarab")
-                    let node = new Node(text);
-                    crdt_client.insertDisplayIndex(node, index);
+
+
+
+                    const node = crdt_client.insertDisplayIndex(new Node(text), index);
+                    //emit socket event to the server to insert the node 
+                    console.log("before emmit")
+                    socket.emit('insert', node)
+                    console.log("passed emmit")
                 } else {
                     console.log("delete")
-                    crdt_client.deleteDisplayIndex(index + 1);
+                    const node = crdt_client.deleteDisplayIndex(index + 1);
+                    //emit socket event to the server to delete the node
+                    socket.emit('delete', node);
+                    console.log("passed emmit")
                 }
             }
 
@@ -96,7 +104,7 @@ const TextEditor = () => {
         return () => {
             quill?.off('text-change', handler);
         }
-    }, [quill]);
+    }, [quill, socket]);
 
 
     const wrapperRef = useCallback((wrapper) => {

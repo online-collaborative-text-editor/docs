@@ -37,18 +37,16 @@ class CRDT {
         node.position = position;
 
         this.insertPosition(node);
+        return node;
     }
 
     // When the client deletes a node, it searches for the display index of the node and deletes the node at that index
     deleteDisplayIndex(displayIndex) {
-        console.log('deleteDisplayIndex');
-        console.log(displayIndex);
-        let position = this.get_DisplayIndexToPosition(displayIndex);
-        console.log("position", position);
-        let arrayIndex = this.positionToArrayIndex(position);
-        console.log("array index", arrayIndex);
 
+        let position = this.get_DisplayIndexToPosition(displayIndex);
+        let arrayIndex = this.positionToArrayIndex(position);
         this.nodes[arrayIndex].tombstone = true;
+        return this.nodes[arrayIndex];
     }
 
     cleanUp() {
