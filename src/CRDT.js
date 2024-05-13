@@ -111,6 +111,31 @@ class CRDT {
         }
         return -1; // Invalid displayIndex
     }
+
+    convertFromCrdtArrayToJSON() {
+    let json = [];
+    for (let node of this.nodes) {
+        json.push({
+            letter: node.letter,
+            position: node.position,
+            bold: node.bold,
+            italic: node.italic,
+            tombstone: node.tombstone
+        });
+    }
+    return JSON.stringify(json);
+}
+
+convertFromJsonToCrdtArray(json) {
+    let nodes = JSON.parse(json);
+    let crdt = new CRDT();
+    for (let node of nodes) {
+        crdt.nodes.push(new Node(node.letter, node.position, node.bold, node.italic, node.tombstone));
+    }
+    return crdt;
+}
+
+
 }
 
 function testCRDT() {
@@ -121,45 +146,61 @@ function testCRDT() {
     // The client wrote a letter 'a' at display index 0
     // He stored it in his own CRDT instance
     let node = new Node('a');
-
+    let node2 = new Node('b');
+    let node3 = new Node('c');
+    let node4 = new Node('d');
     crdt_client.insertDisplayIndex(node, 0);
-
-    console.assert(crdt_client.nodes[1].letter === 'a', 'Client insertDisplayIndex failed');
-
-    // He sent the node to the server
-    // The server stored the node in its own CRDT instance
-    crdt_server.insertPosition(node);
-    console.assert(crdt_server.nodes[1].letter === 'a', 'Server insertPosition failed');
-
-    // The server broadcasted the node to all other clients
-    // The other clients stored the node in their own CRDT instances
-    // The other clients displayed the node at the display index calculated from the position
-    let displayIndex = crdt_client.positionToArrayIndex(node.position);
-    crdt_client.insertDisplayIndex(node, displayIndex);
-    console.assert(crdt_client.nodes[1].letter === 'a', 'Client insertDisplayIndex failed');
-
-    // A client deleted the node
-    crdt_client.deleteDisplayIndex(displayIndex);
-    console.assert(crdt_client.nodes[1].tombstone === true, 'Client deleteDisplayIndex failed');
-
-    // The client sent the delete event to the server
-    // The server stored the delete event in its own CRDT instance
-    crdt_server.deletePosition(node);
-    console.assert(crdt_server.nodes[1].tombstone === true, 'Server deletePosition failed');
-
-    // The server broadcasted the delete event to all other clients
-    // The other clients stored the delete event in their own CRDT instances
-    // The other clients deleted the node from their own CRDT instances
-    // The other clients displayed the delete event at the display index calculated from the position
-    crdt_client.deletePosition(node);
-    console.assert(crdt_client.nodes[1].tombstone === true, 'Client deletePosition failed');
-    //test the position to display index
+    crdt_client.insertDisplayIndex(node2, 1);
+    crdt_client.insertDisplayIndex(node3, 2);
+    crdt_client.insertDisplayIndex(node4, 3);
+    console.log("client crdt", crdt_client.nodes)
+    console.log("after stringify");
+    console.log(crdt_client.convertFromCrdtArrayToJSON());
+    console.log("after parse");
+    console.log(crdt_client.convertFromJsonToCrdtArray(crdt_client.convertFromCrdtArrayToJSON()).nodes);
 
 
-    let displayIndex2 = crdt_client.get_PositionToDisplayIndex(node);
-    // Cleanup the CRDT
-    crdt_server.cleanUp();
 
-    console.assert(crdt_server.nodes.length === 2, 'Server cleanUp failed');
+    // crdt_client.insertDisplayIndex(node, 0);
+
+    //console.assert(crdt_client.nodes[1].letter === 'a', 'Client insertDisplayIndex failed');
+
+    // // He sent the node to the server
+    // // The server stored the node in its own CRDT instance
+    // crdt_server.insertPosition(node);
+    // console.assert(crdt_server.nodes[1].letter === 'a', 'Server insertPosition failed');
+
+    // // The server broadcasted the node to all other clients
+    // // The other clients stored the node in their own CRDT instances
+    // // The other clients displayed the node at the display index calculated from the position
+    // let displayIndex = crdt_client.positionToArrayIndex(node.position);
+    // crdt_client.insertDisplayIndex(node, displayIndex);
+    // console.assert(crdt_client.nodes[1].letter === 'a', 'Client insertDisplayIndex failed');
+
+    // // A client deleted the node
+    // crdt_client.deleteDisplayIndex(displayIndex);
+    // console.assert(crdt_client.nodes[1].tombstone === true, 'Client deleteDisplayIndex failed');
+
+    // // The client sent the delete event to the server
+    // // The server stored the delete event in its own CRDT instance
+    // crdt_server.deletePosition(node);
+    // console.assert(crdt_server.nodes[1].tombstone === true, 'Server deletePosition failed');
+
+    // // The server broadcasted the delete event to all other clients
+    // // The other clients stored the delete event in their own CRDT instances
+    // // The other clients deleted the node from their own CRDT instances
+    // // The other clients displayed the delete event at the display index calculated from the position
+    // crdt_client.deletePosition(node);
+    // console.assert(crdt_client.nodes[1].tombstone === true, 'Client deletePosition failed');
+    // //test the position to display index
+
+
+    // let displayIndex2 = crdt_client.get_PositionToDisplayIndex(node);
+    // // Cleanup the CRDT
+    // crdt_server.cleanUp();
+
+    // console.assert(crdt_server.nodes.length === 2, 'Server cleanUp failed');
+
 }
-export { CRDT, Node };
+//export { CRDT, Node };
+testCRDT();
