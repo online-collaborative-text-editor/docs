@@ -72,7 +72,7 @@ const TextEditor = () => {
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
             console.log("delta in my page", delta)
-
+            //dummy change
             if (delta.ops.length > 0) {
                 if (text) {
                     const newNode = new Node(text);
@@ -91,7 +91,7 @@ const TextEditor = () => {
 
                 } else {
 
-                    const node = crdt_client.deleteDisplayIndex(index + 1);
+                    const node = crdt_client.deleteDisplayIndex(index);
 
                     socket.emit('delete', node);
 
@@ -131,6 +131,16 @@ const TextEditor = () => {
             console.log("delete event from server:")
             console.log(node)
             crdt_client.deletePosition(node);
+            const ops = [];
+            const retain = crdt_client.get_PositionToDisplayIndex(node) != -1 ? crdt_client.get_PositionToDisplayIndex(node) : null
+            if (retain) {
+                ops.push({ retain: retain });
+            }
+            ops.push({ delete: 1 });
+            const delta = { ops: ops };
+            console.log("delta to update quill:", delta)
+            quill.updateContents(delta);
+
         });
         console.log("username:", localStorage.getItem('username'), "crdt after server events", crdt_client)
         quill?.on('text-change', handler);
