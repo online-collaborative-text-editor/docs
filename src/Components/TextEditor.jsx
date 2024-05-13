@@ -100,6 +100,19 @@ const TextEditor = () => {
             console.log("crdt client :")
             console.log(crdt_client)
         }
+        //listen to the server insert and delete events 
+        socket.on('insert', (node) => {
+            console.log("insert event from server:")
+            console.log(node)
+            crdt_client.insertPosition(node);
+
+        });
+        socket.on('delete', (node) => {
+            console.log("delete event from server:")
+            console.log(node)
+            crdt_client.deletePosition(node);
+        });
+        console.log("username:", localStorage.getItem('username'), "crdt after server events", crdt_client)
         quill?.on('text-change', handler);
         return () => {
             quill?.off('text-change', handler);
