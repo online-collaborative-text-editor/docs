@@ -1,22 +1,22 @@
 
 import { TbUserHeart } from "react-icons/tb";
 import { TbPasswordFingerprint } from "react-icons/tb";
-import { MdOutlineAlternateEmail } from "react-icons/md"; 
+import { MdOutlineAlternateEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 const SignUp = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form Submitted'); 
+        console.log('Form Submitted');
         //the url of the post request :http://localhost:8080/api/auth/register 
         //{
-   // "username": "nour",
- //   "password": "password" 
-//} 
+        // "username": "nour",
+        //   "password": "password" 
+        //} 
         const data = {
             username: e.target[0].value,
             password: e.target[1].value,
-          
+
         };
         console.log(data);
         if (e.target[1].value === e.target[2].value) {
@@ -33,12 +33,12 @@ const SignUp = () => {
                 } else {
                     console.log('User Not Created');
                 }
-            }); 
+            });
             //redirect to the dashboard page 
-            navigate('/dashboard');
+            navigate('/');
         } else {
             console.log('Passwords do not match');
-}
+        }
     }
     return (
         <div className='wrapper'>
@@ -56,11 +56,7 @@ const SignUp = () => {
                     <input type="password" placeholder="Confirm Password" required />
                     <TbPasswordFingerprint className='icon' />
                 </div>
-                <div className="input-box">
-                    <input type="email" placeholder="Email" required />
-                    <MdOutlineAlternateEmail className='icon' />
 
-                </div>
                 <button type="submit">Register</button>
 
             </form>
