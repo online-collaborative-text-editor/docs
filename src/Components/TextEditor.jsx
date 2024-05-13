@@ -72,7 +72,7 @@ const TextEditor = () => {
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
             console.log("delta in my page", delta)
-
+            //dummy change
             if (delta.ops.length > 0) {
                 if (text) {
                     const newNode = new Node(text);
