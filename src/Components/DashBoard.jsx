@@ -229,6 +229,8 @@ const DashBoard = () => {
     }
   };
   const handleCloseCancelModal = () => {
+    setRenameModalOpen(false);
+    setShareModalOpen(false);
     setSelectedFile(null); // Clear the selected file
     setDeleteModalOpen(false); // Close the info modal
     setRenderKey((prevKey) => prevKey + 1); // Update renderKey to force re-render
@@ -427,25 +429,31 @@ const DashBoard = () => {
                 defaultValue={selectedFile.documentName}
                 required
                 className="renaming-input-box"
+                style={{height: '50px'}}
               />
             </div>
 
             <button onClick={() => handleCloseRenameModal(selectedFile)} style={saveButtonStyle}>
               Rename
             </button>
+            <br></br>
+            <button onClick={handleCloseCancelModal} style={saveButtonStyle}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
       {shareModalOpen && (
         <div className="info-modal">
-          <div className="info-modal-content-share">
+          <div className="info-modal-content-share" >
             <div className="input-box-share">
               <input
                 ref={shareInputRef}
                 type="text"
-                defaultValue={selectedFile.documentName}
+                placeholder="  share to?"
                 required
                 className="renaming-input-box"
+                style={{height: '50px'}}
               />
             </div>
 
@@ -470,7 +478,7 @@ const DashBoard = () => {
               Share
             </button>
             <br></br>
-            <button onClick={handleCloseShareModal} style={saveButtonStyle}>
+            <button onClick={handleCloseCancelModal} style={saveButtonStyle}>
               Cancel
             </button>
           </div>

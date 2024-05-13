@@ -151,10 +151,16 @@ body {
     padding-right: 5%;
     
 }
-
 .card {
+    display: flex; /* Set the card to be a flex container */
+    flex-direction: column; /* Stack the items vertically */
+    justify-content: space-between;
     width: 12%; /* For larger screens, 6 cards per row */
+    min-width: 200px; /* Minimum width of the card */
+    max-width: 200px; /* Maximum width of the card */
     height: 20%;
+    min-height: 200px; /* Minimum height of the card */
+    max-height: 200px; /* Maximum height of the card */
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -162,6 +168,7 @@ body {
     margin: 16px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     text-align: center;
+    overflow: hidden; /* This will hide any content that exceeds the size of the card */
 }
 .card .icon-container img {
     width: 20px; /* Adjust the size as needed */
@@ -203,7 +210,17 @@ body {
     padding: 20px;
     text-align: center;
 }
-
+@media (max-width: 600px) {
+    .appbar {
+        padding: 10px;
+        text-align: left;
+    }
+    .appbar-buttons {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+    }
+}
 .appbar h1 {
     margin: 0;
 }

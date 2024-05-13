@@ -56,7 +56,7 @@ const TextEditor = () => {
 
         const editor = document.querySelector('.ql-editor');
         // editor.innerHTML = file.content;
-        if (page === "viewed" && editor) {
+        if (file.permission === "VIEWER" && editor) {
             editor.setAttribute('contenteditable', 'false');
             editor.style.backgroundColor = 'lightgrey';
         }
@@ -71,7 +71,7 @@ const TextEditor = () => {
 
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
-            console.log("delta in my page", delta)
+            //console.log("delta in my page", delta)
             //dummy change
             if (delta.ops.length > 0) {
                 if (text) {
@@ -86,7 +86,7 @@ const TextEditor = () => {
                         newNode.italic = true;
                     }
                     const node = crdt_client.insertDisplayIndex(newNode, index);
-                    console.log("client crdt:", crdt_client)
+                    //console.log("client crdt:", crdt_client)
                     socket.emit('insert', node)
 
                 } else {
@@ -106,7 +106,7 @@ const TextEditor = () => {
         //listen to the server insert and delete events 
         socket.on('insert', (node) => {
             console.log("insert event from server:")
-            console.log(node)
+            //console.log(node)
             crdt_client.insertPosition(node);
             //insert the node in the quill editor 
             const ops = [];
@@ -129,7 +129,7 @@ const TextEditor = () => {
         });
         socket.on('delete', (node) => {
             console.log("delete event from server:")
-            console.log(node)
+            // console.log(node)
             crdt_client.deletePosition(node);
             const ops = [];
             const retain = crdt_client.get_PositionToDisplayIndex(node) != -1 ? crdt_client.get_PositionToDisplayIndex(node) : null
@@ -196,7 +196,7 @@ const TextEditor = () => {
             <div id="editorcontainer" ref={wrapperRef}></div>;
             <form id="form" onSubmit={handleSubmit} >
                 <div style={{ textAlign: 'center', margin: '2rem' }}></div>
-                {page != "viewed" ? <button type="submit" style={saveButtonStyle}>Save</button> : null}
+                {file.permission != "VIEWER" ? <button type="submit" style={saveButtonStyle}>Save</button> : null}
 
             </form>
 
