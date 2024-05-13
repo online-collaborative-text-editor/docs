@@ -164,7 +164,12 @@ const DashBoard = () => {
   useEffect(() => {
     console.log('iam inside useeffect');
     const fetchDataAndSetFiles = async () => {
-      const fetchedData = await fetchData(AppbarSelectedPage);
+      let route = AppbarSelectedPage;
+
+      if (AppbarSelectedPage == "edited") {
+        route = "shared-with-me";
+      }
+      const fetchedData = await fetchData(route);
       if (fetchedData) {
         setFiles(fetchedData);
       }

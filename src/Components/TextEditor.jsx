@@ -71,7 +71,7 @@ const TextEditor = () => {
 
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
-
+            console.log("delta in my page", delta)
 
             if (delta.ops.length > 0) {
                 if (text) {
@@ -86,7 +86,7 @@ const TextEditor = () => {
                         newNode.italic = true;
                     }
                     const node = crdt_client.insertDisplayIndex(newNode, index);
-
+                    console.log("client crdt:", crdt_client)
                     socket.emit('insert', node)
 
                 } else {
@@ -110,7 +110,7 @@ const TextEditor = () => {
             crdt_client.insertPosition(node);
             //insert the node in the quill editor 
             const ops = [];
-            const retain = crdt_client.get_PositionToDisplayIndex(node);
+            const retain = crdt_client.get_PositionToDisplayIndex(node) != 0 ? crdt_client.get_PositionToDisplayIndex(node) : null
             const text = node.letter;
             const bold = node.bold;
             const italic = node.italic;
@@ -119,12 +119,11 @@ const TextEditor = () => {
                 italic: italic || null
             } ? { bold: bold, italic: italic } : null;
             //new delta 
-            const delta = {
-                ops: [
-                    { retain: retain },
-                    { insert: text, attributes: attributes }
-                ]
+            if (retain) {
+                ops.push({ retain: retain });
             }
+            ops.push({ insert: text, attributes: attributes });
+            const delta = { ops: ops };
             console.log("delta to update quill:", delta)
             quill.updateContents(delta);
         });

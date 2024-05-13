@@ -17,8 +17,10 @@ class CRDT {
     // When the server receives an insert event from a client, it inserts the node into the CRDT instance
     // When a client receives an insert event from the server, it inserts the node into the CRDT instance, it then calculates the display index from the position and displays the node at that index
     insertPosition(node) {
-
+        console.log("inside insertPosition")
         let arrayIndex = this.positionToArrayIndex(node.position);
+        console.log('arrayIndex', arrayIndex);
+        console.log("position", node.position);
         this.nodes.splice(arrayIndex, 0, node);
     }
 
@@ -96,7 +98,7 @@ class CRDT {
         for (let node of this.nodes) {
             if (!node.tombstone) {
                 if (node.position === position) {
-                    return count;
+                    return count - 1;
                 }
                 count++;
             }
