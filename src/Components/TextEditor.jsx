@@ -142,11 +142,27 @@ const TextEditor = () => {
             quill.updateContents(delta);
 
         });
+        // CURSOR UPDATE LOCATION  
+        quill.on('selection-change', (range, oldRange, source) => {
+            console.log("selection change")
+            if (range) {
+                if (range.length == 0) {
+                    console.log('User cursor is at index', range.index);
+                } else {
+                    const text = quill.getText(range.index, range.length);
+                    console.log('User has highlighted: ', text);
+                }
+            } else {
+                console.log('User cursor is not in editor');
+            }
+        });
+
         console.log("username:", localStorage.getItem('username'), "crdt after server events", crdt_client)
         quill?.on('text-change', handler);
         return () => {
             quill?.off('text-change', handler);
         }
+
     }, [quill, socket]);
 
 
