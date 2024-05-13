@@ -8,23 +8,24 @@ const AppBar = (props) => {
     : "all";
   const name = props.name;
   const page = props.page;
+  const username = props.username;
   // console.log("inside appbar now , the passed currentDashboardPage is " + currentDashboardPage);
   const navigate = useNavigate();
   ////////////////////////////OWNED CLICK HANDLER////////////////////////////
   const handleOwnedClick = () => {
     console.log("Owned clicked");
     //navigate to dashbaord with page owned
-    navigate("/dashboard", { state: { AppbarSelectedPage: "owned" } });
+    navigate("/dashboard", { state: { AppbarSelectedPage: "owned", username } });
   };
   ////////////////////////////EDITED CLICK HANDLER////////////////////////////
   const handleEditClick = () => {
     console.log("Edited clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "edited" } });
+    navigate("/dashboard", { state: { AppbarSelectedPage: "edited", username } });
   };
   ////////////////////////////VIEWED CLICK HANDLER////////////////////////////
   const handleViewedClick = () => {
     console.log("Viewed clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "viewed" } });
+    navigate("/dashboard", { state: { AppbarSelectedPage: "viewed", username } });
   };
   ////////////////////////////NEW CLICK HANDLER////////////////////////////
   const handleNewClick = () => {
@@ -47,6 +48,7 @@ const AppBar = (props) => {
             state: {
               file: { name: "untitled", content: "" },
               AppbarSelectedPage: "created",
+              username: username,
             },
           });
         } else {
@@ -60,7 +62,7 @@ const AppBar = (props) => {
   ////////////////////////////ALL CLICK HANDLER////////////////////////////
   const handleAllClick = () => {
     console.log("All clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "all" } });
+    navigate("/dashboard", { state: { AppbarSelectedPage: "all", username } });
   };
   ////////////////////////////LOGOUT CLICK HANDLER//////////////////////////// 
   const handleLogoutClick = () => {

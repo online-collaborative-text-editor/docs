@@ -32,10 +32,12 @@ const TextEditor = () => {
     const file = location.state?.file;
     let page = location.state?.page;
     const docId = location.state?.docId;
+    const username = location.state?.username;
 
     console.log("file is", file);
     console.log("page is", page);
     console.log("docId is", docId);
+    console.log("username is", username);
 
     let crdt_client = new CRDT();
     const [socket, setSocket] = useState();
@@ -43,7 +45,7 @@ const TextEditor = () => {
     useEffect(() => {
         const s = io('http://localhost:5000', {
             query: {
-                username: localStorage.getItem('username'),
+                username,
                 docId: docId
             }
         });

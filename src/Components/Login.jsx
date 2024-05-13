@@ -53,7 +53,7 @@ const Login = () => {
                     console.log("response data is:", data);
                     localStorage.setItem('token', data.accessToken);
                     localStorage.setItem('username', document.getElementById('username').value);
-                    navigate('/dashboard');
+                    navigate('/dashboard', { state: { username: document.getElementById('username').value } });
 
                     // TODO: at logout, remove the token and username from local storage
                 });

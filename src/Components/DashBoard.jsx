@@ -116,6 +116,7 @@ const DashBoard = () => {
   const AppbarSelectedPage = location.state?.AppbarSelectedPage
     ? location.state.AppbarSelectedPage
     : currentDashboardPage;
+  const username = location.state?.username;
   console.log(
     "inside dashboard now , AppbarSelectedPage passed from the appBar is :"
   );
@@ -186,7 +187,7 @@ const DashBoard = () => {
       file = { name: "untitled", content: "" };
     console.log("file id is");
     console.log(file.id)
-    navigate("/editor", { state: { file, page: currentDashboardPage, docId: file.id } });
+    navigate("/editor", { state: { file, page: currentDashboardPage, docId: file.id, username } });
   };
   ///////////////////////////// HANDLE DELETE ///////////////////////////////////////
   const handleDelete = (file) => {
@@ -321,7 +322,9 @@ const DashBoard = () => {
   ///////////////////////////// RENDER ////////////////////////////////////////////
   return (
     <div>
-      <AppBar currentDashboardPage={currentDashboardPage} />
+      <AppBar currentDashboardPage={currentDashboardPage}
+        username={username}
+      />
       <div className="docs-container">
         {files.map((file, index) => (
           <div key={index} className="card">
