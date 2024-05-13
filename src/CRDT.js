@@ -33,6 +33,8 @@ class CRDT {
 
     // When the client inserts a node, it calculates the position from the display index and inserts the node into the CRDT instance
     insertDisplayIndex(node, displayIndex) {
+        console.log("inside insertDisplayIndex")
+        console.log("displayIndex", displayIndex)
 
         let position = this.calculate_DisplayIndexToPosition(displayIndex);
 
@@ -44,10 +46,14 @@ class CRDT {
 
     // When the client deletes a node, it searches for the display index of the node and deletes the node at that index
     deleteDisplayIndex(displayIndex) {
-
+        console.log("inside deleteDisplayIndex")
+        console.log("displayIndex", displayIndex)
         let position = this.get_DisplayIndexToPosition(displayIndex);
         let arrayIndex = this.positionToArrayIndex(position);
         this.nodes[arrayIndex].tombstone = true;
+        console.log("arrayIndex", arrayIndex)
+        console.log("position", position)
+        console.log("node", this.nodes[arrayIndex])
         return this.nodes[arrayIndex];
     }
 
@@ -58,7 +64,7 @@ class CRDT {
     ////////////////////////////////////////////////////// Helper Functions /////////////////////////////////////////////////////////////////////
 
     positionToArrayIndex(position) {
-        return this.nodes.findIndex(node => node.position === position);
+        return this.nodes.findIndex(node => node.position > position);
     }
 
     // Convert between displayIndex and position
