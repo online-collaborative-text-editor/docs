@@ -202,5 +202,5 @@ function testCRDT() {
     // console.assert(crdt_server.nodes.length === 2, 'Server cleanUp failed');
 
 }
-//export { CRDT, Node };
-testCRDT();
+export { CRDT, Node };
+//testCRDT();
