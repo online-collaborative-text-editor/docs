@@ -66,35 +66,103 @@ const TextEditor = () => {
     useEffect(() => {
         if (quill == null || socket == null) return;
 
+
         const handler = (delta, oldDelta, source) => {
             if (source !== 'user') return;
+            console.log("inside useEffect")
 
             const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
             const text = (delta.ops[1]?.insert ? delta.ops[1]?.insert : delta.ops[0]?.insert) || null;
-            //console.log("delta in my page", delta)
-            //dummy change
+            let selection_flag = false;
+            console.log("delta:", delta)
             if (delta.ops.length > 0) {
-                if (text) {
-                    const newNode = new Node(text);
 
+                ///////////////////////////////////////////NEW PART FOR SELECTION HANDLING///////////////////////////////////////////
+                if (delta.ops.length == 2 && delta.ops[1]?.retain) {
+                    console.log("selection detected")
+                    selection_flag = true;
                     const is_bold = (delta.ops[1]?.attributes?.bold) ? delta.ops[1]?.attributes?.bold : delta.ops[0]?.attributes?.bold
                     const is_italic = (delta.ops[1]?.attributes?.italic) ? delta.ops[1]?.attributes?.italic : delta.ops[0]?.attributes?.italic
-                    if (is_bold) {
-                        newNode.bold = true;
+                    const start_index = delta.ops[0].retain;
+                    const end_index = delta.ops[0].retain + delta.ops[1].retain;
+                    console.log("start index:", start_index)
+                    console.log("end index:", end_index)
+
+                    console.log("crdt client before loop:", crdt_client)
+
+                    for (let i = start_index - 1; i < end_index - 1; i++) {
+                        let position = crdt_client.get_DisplayIndexToPosition(i);
+                        console.log("position:", position)
+                        let array_index = crdt_client.positionToArrayIndex(position);
+                        console.log("array index:", array_index)
+                        console.log("crdt client", crdt_client)
+                        let node = crdt_client.nodes[array_index];
+                        console.log("node:", node)
+
+                        if (is_bold) {
+                            crdt_client.updateBold(node)
+                            socket.emit('bold', node)
+                        }
+                        if (is_italic) {
+                            crdt_client.updateItalic(node);
+                            socket.emit('italic', node)
+                        }
+                        //todo: unbold and unitalic
+
                     }
-                    if (is_italic) {
-                        newNode.italic = true;
+                    console.log("crdt client after loop:", crdt_client)
+                }
+                /////////////Handling formatting from index 0 
+                if (delta.ops.length == 1 && !delta.ops[0]?.delete && delta.ops[0]?.retain && !delta.ops[0]?.insert) {
+                    selection_flag = true;
+                    const is_bold = (delta.ops[1]?.attributes?.bold) ? delta.ops[1]?.attributes?.bold : delta.ops[0]?.attributes?.bold
+                    const is_italic = (delta.ops[1]?.attributes?.italic) ? delta.ops[1]?.attributes?.italic : delta.ops[0]?.attributes?.italic
+
+                    const end_index = delta.ops[0].retain;
+
+                    console.log("end index:", end_index)
+                    console.log("crdt client before the bottom loop:", crdt_client)
+                    for (let i = -1; i < end_index - 1; i++) {
+                        let position = crdt_client.get_DisplayIndexToPosition(i);
+                        console.log("position:", position)
+                        let array_index = crdt_client.positionToArrayIndex(position);
+                        console.log("array index:", array_index)
+                        console.log("crdt client", crdt_client)
+                        let node = crdt_client.nodes[array_index];
+                        console.log("node:", node)
+                        if (is_bold)
+                            crdt_client.updateBold(node);
+                        if (is_italic)
+                            crdt_client.updateItalic(node);
+
                     }
-                    const node = crdt_client.insertDisplayIndex(newNode, index);
-                    //console.log("client crdt:", crdt_client)
-                    socket.emit('insert', node)
+                }
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                if (!selection_flag) {
+                    console.log("normal insert or delete , i shouldnt be here")
+                    if (text) {
+                        const newNode = new Node(text);
 
-                } else {
+                        const is_bold = (delta.ops[1]?.attributes?.bold) ? delta.ops[1]?.attributes?.bold : delta.ops[0]?.attributes?.bold
+                        const is_italic = (delta.ops[1]?.attributes?.italic) ? delta.ops[1]?.attributes?.italic : delta.ops[0]?.attributes?.italic
+                        if (is_bold) {
+                            newNode.bold = true;
+                        }
+                        if (is_italic) {
+                            newNode.italic = true;
+                        }
+                        const node = crdt_client.insertDisplayIndex(newNode, index);
+                        console.log("client crdt after normal insert :", crdt_client)
+                        socket.emit('insert', node)
 
-                    const node = crdt_client.deleteDisplayIndex(index);
+                    } else {
 
-                    socket.emit('delete', node);
+                        const node = crdt_client.deleteDisplayIndex(index);
 
+                        socket.emit('delete', node);
+                        console.log("client crdt after normal delete :", crdt_client)
+
+                    }
                 }
 
             }
