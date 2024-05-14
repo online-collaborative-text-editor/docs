@@ -17,10 +17,10 @@ class CRDT {
     // When the server receives an insert event from a client, it inserts the node into the CRDT instance
     // When a client receives an insert event from the server, it inserts the node into the CRDT instance, it then calculates the display index from the position and displays the node at that index
     insertPosition(node) {
-        console.log("inside insertPosition")
+        // console.log("inside insertPosition")
         let arrayIndex = this.positionToArrayIndex(node.position);
-        console.log('arrayIndex', arrayIndex);
-        console.log("position", node.position);
+        // console.log('arrayIndex', arrayIndex);
+        // console.log("position", node.position);
         this.nodes.splice(arrayIndex, 0, node);
     }
 
@@ -33,8 +33,8 @@ class CRDT {
 
     // When the client inserts a node, it calculates the position from the display index and inserts the node into the CRDT instance
     insertDisplayIndex(node, displayIndex) {
-        console.log("inside insertDisplayIndex")
-        console.log("displayIndex", displayIndex)
+        console.log("inserting")
+        // console.log("displayIndex", displayIndex)
 
         let position = this.calculate_DisplayIndexToPosition(displayIndex);
 
@@ -46,14 +46,14 @@ class CRDT {
 
     // When the client deletes a node, it searches for the display index of the node and deletes the node at that index
     deleteDisplayIndex(displayIndex) {
-        console.log("inside deleteDisplayIndex")
-        console.log("displayIndex", displayIndex)
+        // console.log("inside deleteDisplayIndex")
+        // console.log("displayIndex", displayIndex)
         let position = this.get_DisplayIndexToPosition(displayIndex);
         let arrayIndex = this.positionToArrayIndex(position);
         this.nodes[arrayIndex].tombstone = true;
-        console.log("arrayIndex", arrayIndex)
-        console.log("position", position)
-        console.log("node", this.nodes[arrayIndex])
+        // console.log("arrayIndex", arrayIndex)
+        // console.log("position", position)
+        // console.log("node", this.nodes[arrayIndex])
         return this.nodes[arrayIndex];
     }
 
@@ -113,27 +113,37 @@ class CRDT {
     }
 
     convertFromCrdtArrayToJSON() {
-    let json = [];
-    for (let node of this.nodes) {
-        json.push({
-            letter: node.letter,
-            position: node.position,
-            bold: node.bold,
-            italic: node.italic,
-            tombstone: node.tombstone
-        });
+        let json = [];
+        for (let node of this.nodes) {
+            json.push({
+                letter: node.letter,
+                position: node.position,
+                bold: node.bold,
+                italic: node.italic,
+                tombstone: node.tombstone
+            });
+        }
+        return JSON.stringify(json);
     }
-    return JSON.stringify(json);
-}
 
-convertFromJsonToCrdtArray(json) {
-    let nodes = JSON.parse(json);
-    let crdt = new CRDT();
-    for (let node of nodes) {
-        crdt.nodes.push(new Node(node.letter, node.position, node.bold, node.italic, node.tombstone));
+    convertFromJsonToCrdtArray(json) {
+        let nodes = JSON.parse(json);
+        let crdt = new CRDT();
+        for (let node of nodes) {
+            crdt.nodes.push(new Node(node.letter, node.position, node.bold, node.italic, node.tombstone));
+        }
+        return crdt;
     }
-    return crdt;
-}
+    //update the node to be bold 
+    updateBold(node) {
+        let arrayIndex = this.positionToArrayIndex(node.position);
+        this.nodes[arrayIndex].bold = !(this.nodes[arrayIndex].bold);
+    }
+    //update the node to be italic 
+    updateItalic(node) {
+        let arrayIndex = this.positionToArrayIndex(node.position);
+        this.nodes[arrayIndex].italic = !(this.nodes[arrayIndex].italic);
+    }
 
 
 }
@@ -153,11 +163,11 @@ function testCRDT() {
     crdt_client.insertDisplayIndex(node2, 1);
     crdt_client.insertDisplayIndex(node3, 2);
     crdt_client.insertDisplayIndex(node4, 3);
-    console.log("client crdt", crdt_client.nodes)
-    console.log("after stringify");
-    console.log(crdt_client.convertFromCrdtArrayToJSON());
-    console.log("after parse");
-    console.log(crdt_client.convertFromJsonToCrdtArray(crdt_client.convertFromCrdtArrayToJSON()).nodes);
+    // console.log("client crdt", crdt_client.nodes)
+    // console.log("after stringify");
+    // console.log(crdt_client.convertFromCrdtArrayToJSON());
+    // console.log("after parse");
+    // console.log(crdt_client.convertFromJsonToCrdtArray(crdt_client.convertFromCrdtArrayToJSON()).nodes);
 
 
 
