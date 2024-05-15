@@ -68,11 +68,11 @@ const AppBar = (props) => {
         console.error("Error:", error);
       });
   };
-  ////////////////////////////ALL CLICK HANDLER////////////////////////////
-  const handleAllClick = () => {
-    console.log("All clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "all", username } });
-  };
+  // ////////////////////////////ALL CLICK HANDLER////////////////////////////
+  // const handleAllClick = () => {
+  //   console.log("All clicked");
+  //   navigate("/dashboard", { state: { AppbarSelectedPage: "all", username } });
+  // };
   ////////////////////////////LOGOUT CLICK HANDLER////////////////////////////
   const handleLogoutClick = () => {
     console.log("Logout clicked");
@@ -80,8 +80,6 @@ const AppBar = (props) => {
     localStorage.removeItem("username");
     navigate("/");
   };
-  //
-
   ////////////////////////////RETURN STATEMENT////////////////////////////
   return (
     <div>
@@ -97,9 +95,9 @@ const AppBar = (props) => {
         {currentDashboardPage === "created" && !name ? (
           <AnimatedH1>Create new file</AnimatedH1>
         ) : null}
-        {currentDashboardPage === "all" && !name ? (
+        {/* {currentDashboardPage === "all" && !name ? (
           <AnimatedH1>All files</AnimatedH1>
-        ) : null}
+        ) : null} */}
         <div className="appbar-buttons">
           {currentDashboardPage !== "owned" && !name ? (
             <button onClick={handleOwnedClick}>My owned documents</button>
@@ -108,10 +106,10 @@ const AppBar = (props) => {
             <button onClick={handleEditClick}>Shared with me</button>
           ) : null}
 
-          {currentDashboardPage !== "all" && !name ? (
+          {/* {currentDashboardPage !== "all" && !name ? (
             <button onClick={handleAllClick}>All</button>
-          ) : null}
-          {currentDashboardPage !== "created" && !name ? (
+          ) : null} */}
+          {(currentDashboardPage !== "edited" || currentDashboardPage !== "created" || currentDashboardPage !== "owned") ? (
             <button onClick={handleNewClick}>Create new</button>
           ) : null}
           <button onClick={handleLogoutClick}>Logout</button>

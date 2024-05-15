@@ -33,20 +33,18 @@ const TextEditor = () => {
   const username = location.state?.username;
   //console.log("docId in text editor:", docId);
 
-//   let crdt_client = new CRDT();
-//   console.log("crdt client in beggining of text editor:", crdt_client);
-const [crdt_client, setCrdtClient] = useState(null);
+  //   let crdt_client = new CRDT();
+  //   console.log("crdt client in beggining of text editor:", crdt_client);
+
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
-  
+  const crdtClientRef = useRef(null);
+
 
   useEffect(() => {
     const client = new CRDT();
-    //i need to pop the last 2 elements from the crdt_client.nodes array
-    // client.nodes.reverse();
-    // client.nodes.pop();
-    // client.nodes.pop();
-    setCrdtClient(client);
+    crdtClientRef.current = client;
+
     console.log("crdt client in beginning of text editor:", client);
   }, []);
 
@@ -61,6 +59,14 @@ const [crdt_client, setCrdtClient] = useState(null);
     console.log("connected to server");
     return () => {
       s.disconnect();
+      console.log("i am diconnected");
+
+      if (crdtClientRef?.current) {
+        console.log(crdtClientRef.current);
+        crdtClientRef.current.deleteAllNodes();
+        console.log("crdt client after deleting all nodes");
+        console.log(crdtClientRef.current);
+      }
     };
   }, []);
 
@@ -76,9 +82,11 @@ const [crdt_client, setCrdtClient] = useState(null);
   useEffect(() => {
     if (quill == null || socket == null) return;
 
+
     const handler = (delta, oldDelta, source) => {
       if (source !== "user") return;
       console.log("inside useEffect");
+      const crdt_client = crdtClientRef.current;
 
       const index = delta.ops[0]?.retain ? delta.ops[0]?.retain : 0;
       const text =
@@ -104,7 +112,7 @@ const [crdt_client, setCrdtClient] = useState(null);
 
           console.log("crdt client before loop:", crdt_client);
 
-          for (let i = start_index ; i < end_index ; i++) {
+          for (let i = start_index; i < end_index; i++) {
             let position = crdt_client.get_DisplayIndexToPosition(i);
             console.log("position:", position);
             let array_index = crdt_client.positionToArrayIndex(position);
@@ -145,9 +153,9 @@ const [crdt_client, setCrdtClient] = useState(null);
 
           console.log("end index:", end_index);
           console.log("crdt client before the bottom loop:", crdt_client);
-          let array_bold_nodes=[];
-          let array_italic_nodes=[];
-          for (let i = 0; i < end_index ; i++) {
+          let array_bold_nodes = [];
+          let array_italic_nodes = [];
+          for (let i = 0; i < end_index; i++) {
             let position = crdt_client.get_DisplayIndexToPosition(i);
             console.log("position:", position);
             let array_index = crdt_client.positionToArrayIndex(position);
@@ -155,25 +163,25 @@ const [crdt_client, setCrdtClient] = useState(null);
             console.log("crdt client", crdt_client);
             let node = crdt_client.nodes[array_index];
             console.log("node:", node);
-           
+
             if (is_bold) {
               crdt_client.updateBold(node);
-                array_bold_nodes.push(node);
+              array_bold_nodes.push(node);
               //socket.emit("bold", node);
             }
             if (is_italic) {
               crdt_client.updateItalic(node);
-                array_italic_nodes.push(node);
-             // socket.emit("italic", node);
-              
+              array_italic_nodes.push(node);
+              // socket.emit("italic", node);
+
             }
           }
-            for (let i = 0; i < array_bold_nodes.length; i++) {
-                socket.emit("bold", array_bold_nodes[i]);
-                }
-            for (let i = 0; i < array_italic_nodes.length; i++) {
-                socket.emit("italic", array_italic_nodes[i]);
-                }
+          for (let i = 0; i < array_bold_nodes.length; i++) {
+            socket.emit("bold", array_bold_nodes[i]);
+          }
+          for (let i = 0; i < array_italic_nodes.length; i++) {
+            socket.emit("italic", array_italic_nodes[i]);
+          }
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (!selection_flag) {
@@ -211,120 +219,141 @@ const [crdt_client, setCrdtClient] = useState(null);
     };
     //listen to bold events 
     socket.on("bold", (node) => {
-        console.log("bold event from server:");
-        console.log(node)
-        crdt_client.updateBold(node);
-        // i want to make a delta to delete the node from the quill editor before making it bold
-        const opsDelete = [];
-        const retainDelete = crdt_client.get_PositionToDisplayIndex(node);
-        console.log("retainDelete:", retainDelete);
-        if (retainDelete) {
-            opsDelete.push({ retain: retainDelete });
-        }
-        opsDelete.push({ delete: 1 });
-        const deltaDelete = { ops: opsDelete };
-        console.log("delta to delete node before making it bold:", deltaDelete);
-        quill.updateContents(deltaDelete);
-        const ops = [];
-        const retain =
-            crdt_client.get_PositionToDisplayIndex(node) != 0
-                ? crdt_client.get_PositionToDisplayIndex(node)
-                : null;
-        const text = node.letter;
-        const bold = node.bold;
-        const italic = node.italic;
-        const attributes = {
-            bold: bold || null,
-            italic: italic || null,
-        }
-            ? { bold: bold, italic: italic }
-            : null;
-        //new delta
-        if (retain) {
-            ops.push({ retain: retain });
-        }
-        ops.push({ insert: text, attributes: attributes });
-        const delta = { ops: ops };
-        console.log("delta to update quill bold:", delta);
-        quill.updateContents(delta);
+      const crdt_client = crdtClientRef.current;
+      console.log("bold event from server:");
+      console.log(node)
+      crdt_client.updateBold(node);
+      // i want to make a delta to delete the node from the quill editor before making it bold
+      const opsDelete = [];
+      const retainDelete = crdt_client.get_PositionToDisplayIndex(node);
+      console.log("retainDelete:", retainDelete);
+      if (retainDelete) {
+        opsDelete.push({ retain: retainDelete });
+      }
+      opsDelete.push({ delete: 1 });
+      const deltaDelete = { ops: opsDelete };
+      console.log("delta to delete node before making it bold:", deltaDelete);
+      quill.updateContents(deltaDelete);
+      const ops = [];
+      const retain =
+        crdt_client.get_PositionToDisplayIndex(node) != 0
+          ? crdt_client.get_PositionToDisplayIndex(node)
+          : null;
+      const text = node.letter;
+      const bold = node.bold;
+      const italic = node.italic;
+      const attributes = {
+        bold: bold || null,
+        italic: italic || null,
+      }
+        ? { bold: bold, italic: italic }
+        : null;
+      //new delta
+      if (retain) {
+        ops.push({ retain: retain });
+      }
+      ops.push({ insert: text, attributes: attributes });
+      const delta = { ops: ops };
+      console.log("delta to update quill bold:", delta);
+      quill.updateContents(delta);
     });
 
     // listen to italic events
     socket.on("italic", (node) => {
-        console.log("italic event from server:");
-        console.log(node)
-        crdt_client.updateItalic(node);
-        // i want to make a delta to delete the node from the quill editor before making it italic
-        const opsDelete = [];
-        const retainDelete = crdt_client.get_PositionToDisplayIndex(node);
-        console.log("retainDelete:", retainDelete);
-        if (retainDelete) {
-            opsDelete.push({ retain: retainDelete });
-        }
-        opsDelete.push({ delete: 1 });
-        const deltaDelete = { ops: opsDelete };
-        console.log("delta to delete node before making it italic:", deltaDelete);
-        quill.updateContents(deltaDelete);
-        const ops = [];
-        const retain =
+      console.log("italic event from server:");
+      console.log(node)
+      const crdt_client = crdtClientRef.current;
+      crdt_client.updateItalic(node);
+      // i want to make a delta to delete the node from the quill editor before making it italic
+      const opsDelete = [];
+      const retainDelete = crdt_client.get_PositionToDisplayIndex(node);
+      console.log("retainDelete:", retainDelete);
+      if (retainDelete) {
+        opsDelete.push({ retain: retainDelete });
+      }
+      opsDelete.push({ delete: 1 });
+      const deltaDelete = { ops: opsDelete };
+      console.log("delta to delete node before making it italic:", deltaDelete);
+      quill.updateContents(deltaDelete);
+      const ops = [];
+      const retain =
 
-            crdt_client.get_PositionToDisplayIndex(node) != 0
-                ? crdt_client.get_PositionToDisplayIndex(node)
-                : null;
+        crdt_client.get_PositionToDisplayIndex(node) != 0
+          ? crdt_client.get_PositionToDisplayIndex(node)
+          : null;
+      const text = node.letter;
+      const bold = node.bold;
+      const italic = node.italic;
+      const attributes = {
+        bold: bold || null,
+        italic: italic || null,
+      }
+        ? { bold: bold, italic: italic }
+        : null;
+      //new delta
+      if (retain) {
+        ops.push({ retain: retain });
+      }
+      ops.push({ insert: text, attributes: attributes });
+      const delta = { ops: ops };
+      console.log("delta to update quill italic:", delta);
+      quill.updateContents(delta);
+    });
+
+
+
+
+
+    // i will receive the crdt  of the current document from the server and put it in my crdt and display it in the quill editor
+    socket.on("crdt", (crdt) => {
+      const crdt_client = crdtClientRef.current;
+      console.log("before receiving crdt from server: should be empty ", crdt_client)
+      console.log("crdt from server:", crdt);
+      console.log("crdt length:", crdt.length);
+      const lastNode = crdt.nodes[crdt.nodes.length - 1];
+      crdt_client.nodes.pop();
+      crdt_client.nodes.pop();
+      for (let i = 0; i < crdt.nodes.length; i++) {
+        // console.log("inside loop")
+        let newNode = new Node(crdt.nodes[i].letter);
+        newNode.bold = crdt.nodes[i].bold;
+        newNode.italic = crdt.nodes[i].italic;
+        newNode.position = crdt.nodes[i].position;
+        newNode.tombstone = crdt.nodes[i].tombstone;
+        crdt_client.nodes.push(newNode);
+      }
+      //crdt_client.nodes.push(lastNode);
+      console.log("after receiving crdt from server: should be full ", crdt_client)
+      //make another loop over the crdt_client to display it in the quill editor 
+      for (let i = 1; i < crdt_client.nodes.length - 1; i++) {
+        const node = crdt_client.nodes[i];
+        const ops = [];
+
+        const retain =
+          crdt_client.get_PositionToDisplayIndex(node) != 0
+            ? crdt_client.get_PositionToDisplayIndex(node)
+            : null;
         const text = node.letter;
         const bold = node.bold;
         const italic = node.italic;
         const attributes = {
-            bold: bold || null,
-            italic: italic || null,
+          bold: bold || null,
+          italic: italic || null,
         }
-            ? { bold: bold, italic: italic }
-            : null;
+          ? { bold: bold, italic: italic }
+          : null;
         //new delta
         if (retain) {
-            ops.push({ retain: retain });
+          ops.push({ retain: retain });
         }
         ops.push({ insert: text, attributes: attributes });
         const delta = { ops: ops };
-        console.log("delta to update quill italic:", delta);
-        quill.updateContents(delta);
-    });
-// i will receive the crdt  of the current document from the server and put it in my crdt and display it in the quill editor
-    socket.on("crdt", (crdt) => {
-        console.log("before receiving crdt from server:", crdt_client)
-        console.log("crdt from server:", crdt);
-       
-        //setCrdtClient(crdt);
-        //console.log("crdt client after receiving crdt from server:", crdt_client);
-        const ops = [];
-        for (let node in crdt.nodes) {
-            //console.log("node:", node);
-            crdt_client.insertPosition(node);
-            // crdt_client.nodes.push(node);
-            // node =crdt[i];
-            
-            const retain = crdt_client.get_PositionToDisplayIndex(node) != -1
-            ? crdt_client.get_PositionToDisplayIndex(node)
-            : null;
-            const text = node.letter;
-            const bold = node.bold;
-            const italic = node.italic;
-            const attributes = {
-                bold: bold || null,
-                italic: italic || null,
-            }
-
-                ? { bold: bold, italic: italic }
-                : null;
-            //new delta
-            if (retain) {
-                ops.push({ retain: retain });
-            }
-            ops.push({ insert: text, attributes: attributes });
-        }
-        const delta = { ops: ops };
         console.log("delta to update quill:", delta);
+        console.log("crdt client after insert event", crdt_client);
         quill.updateContents(delta);
+
+      }
+
     });
 
 
@@ -333,6 +362,7 @@ const [crdt_client, setCrdtClient] = useState(null);
     socket.on("insert", (node) => {
       console.log("insert event from server:");
       //console.log(node)
+      let crdt_client = crdtClientRef.current;
       crdt_client.insertPosition(node);
       //insert the node in the quill editor
       const ops = [];
@@ -361,7 +391,8 @@ const [crdt_client, setCrdtClient] = useState(null);
     });
     socket.on("delete", (node) => {
       console.log("delete event from server:");
-      // console.log(node)
+      // console.log(node) 
+      let crdt_client = crdtClientRef.current;
       crdt_client.deletePosition(node);
       const ops = [];
       const retain =
@@ -395,7 +426,7 @@ const [crdt_client, setCrdtClient] = useState(null);
       "username:",
       localStorage.getItem("username"),
       "crdt after server events",
-      crdt_client
+      crdtClientRef.current
     );
     quill?.on("text-change", handler);
     return () => {
@@ -421,9 +452,9 @@ const [crdt_client, setCrdtClient] = useState(null);
     // console.log(mockDatabase);
     // //TODO:http request to save the content
     console.log("saving the file");
-//sending doc id
-console.log("docId:",docId);
-    socket.emit("save",docId);
+    //sending doc id
+    console.log("docId:", docId);
+    socket.emit("save", docId);
 
   };
   return (

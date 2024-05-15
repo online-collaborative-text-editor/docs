@@ -144,6 +144,12 @@ class CRDT {
         let arrayIndex = this.positionToArrayIndex(node.position);
         this.nodes[arrayIndex].italic = !(this.nodes[arrayIndex].italic);
     }
+    //this function remove  all the nodes in the array except the first and the last node 
+    deleteAllNodes() {
+        const length = this.nodes.length;
+        this.nodes = this.nodes.filter((node, index) => index === 0 || index === length - 1);
+
+    }
 
 
 }
