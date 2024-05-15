@@ -31,10 +31,25 @@ const TextEditor = () => {
   let page = location.state?.page;
   const docId = location.state?.docId;
   const username = location.state?.username;
+  //console.log("docId in text editor:", docId);
 
-  let crdt_client = new CRDT();
+//   let crdt_client = new CRDT();
+//   console.log("crdt client in beggining of text editor:", crdt_client);
+const [crdt_client, setCrdtClient] = useState(null);
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
+  
+
+  useEffect(() => {
+    const client = new CRDT();
+    //i need to pop the last 2 elements from the crdt_client.nodes array
+    client.nodes.reverse();
+    client.nodes.pop();
+    client.nodes.pop();
+    setCrdtClient(client);
+    console.log("crdt client in beginning of text editor:", client);
+  }, []);
+
   useEffect(() => {
     const s = io("http://localhost:5000/", {
       query: {
@@ -162,8 +177,10 @@ const TextEditor = () => {
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (!selection_flag) {
+
           console.log("normal insert or delete , i shouldnt be here");
           if (text) {
+            console.log("before insert crdt:", crdt_client)
             const newNode = new Node(text);
 
             const is_bold = delta.ops[1]?.attributes?.bold
@@ -272,6 +289,42 @@ const TextEditor = () => {
         console.log("delta to update quill italic:", delta);
         quill.updateContents(delta);
     });
+// i will receive the crdt  of the current document from the server and put it in my crdt and display it in the quill editor
+    socket.on("crdt", (crdt) => {
+        console.log("before receiving crdt from server:", crdt_client)
+        console.log("crdt from server:", crdt);
+        //crdt_client = crdt;
+        //console.log("crdt client after receiving crdt from server:", crdt_client);
+        const ops = [];
+        for (let node of crdt.nodes) {
+            console.log("node:", node);
+            //crdt_client.insertPosition(node);
+
+            crdt_client.nodes.push(node);
+            const retain = crdt_client.get_PositionToDisplayIndex(node) != -1
+            ? crdt_client.get_PositionToDisplayIndex(node)
+            : null;
+            const text = node.letter;
+            const bold = node.bold;
+            const italic = node.italic;
+            const attributes = {
+                bold: bold || null,
+                italic: italic || null,
+            }
+
+                ? { bold: bold, italic: italic }
+                : null;
+            //new delta
+            if (retain) {
+                ops.push({ retain: retain });
+            }
+            ops.push({ insert: text, attributes: attributes });
+        }
+        const delta = { ops: ops };
+        console.log("delta to update quill:", delta);
+        quill.updateContents(delta);
+    });
+
 
 
     //listen to the server insert and delete events
@@ -301,6 +354,7 @@ const TextEditor = () => {
       ops.push({ insert: text, attributes: attributes });
       const delta = { ops: ops };
       console.log("delta to update quill:", delta);
+      console.log("crdt client after insert event", crdt_client);
       quill.updateContents(delta);
     });
     socket.on("delete", (node) => {
@@ -358,12 +412,17 @@ const TextEditor = () => {
   }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
-    const editor = document.querySelector(".ql-editor");
-    const content = editor.innerHTML;
-    const fileName = prompt("Enter the file name", "untitled");
-    mockDatabase.push({ name: fileName, content: content });
-    console.log(mockDatabase);
-    //TODO:http request to save the content
+    // const editor = document.querySelector(".ql-editor");
+    // const content = editor.innerHTML;
+    // const fileName = prompt("Enter the file name", "untitled");
+    // mockDatabase.push({ name: fileName, content: content });
+    // console.log(mockDatabase);
+    // //TODO:http request to save the content
+    console.log("saving the file");
+//sending doc id
+console.log("docId:",docId);
+    socket.emit("save",docId);
+
   };
   return (
     <div>
@@ -372,7 +431,7 @@ const TextEditor = () => {
       <form id="form" onSubmit={handleSubmit}>
         <div style={{ textAlign: "center", margin: "2rem" }}></div>
         {file.permission != "VIEWER" ? (
-          <button type="submit" style={saveButtonStyle}>
+          <button type="submit" style={saveButtonStyle} >
             Save
           </button>
         ) : null}

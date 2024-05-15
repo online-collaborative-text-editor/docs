@@ -15,16 +15,21 @@ const AppBar = (props) => {
   const handleOwnedClick = () => {
     console.log("Owned clicked");
     //navigate to dashbaord with page owned
-    navigate("/dashboard", { state: { AppbarSelectedPage: "owned", username } });
+    navigate("/dashboard", {
+      state: { AppbarSelectedPage: "owned", username },
+    });
   };
   ////////////////////////////EDITED CLICK HANDLER////////////////////////////
   const handleEditClick = () => {
     console.log("Edited clicked");
-    navigate("/dashboard", { state: { AppbarSelectedPage: "edited", username } });
+    navigate("/dashboard", {
+      state: { AppbarSelectedPage: "edited", username },
+    });
   };
 
   ////////////////////////////NEW CLICK HANDLER////////////////////////////
   const handleNewClick = () => {
+    let docId;
     console.log("New clicked");
     const data = {
       documentName: "untitled",
@@ -40,12 +45,20 @@ const AppBar = (props) => {
         console.log(response);
         if (response.status === 201) {
           console.log("document created");
-          navigate("/editor", {
-            state: {
-              file: { name: "untitled", content: "" },
-              AppbarSelectedPage: "created",
-              username: username,
-            },
+          //get the id from the response body it is a string not json
+          response.text().then((data) => {
+            console.log("response data is:", data);
+            docId = data;
+            console.log("docId is:", docId);
+
+            navigate("/editor", {
+              state: {
+                file: { name: "untitled", content: "" },
+                AppbarSelectedPage: "created",
+                username: username,
+                docId: docId,
+              },
+            });
           });
         } else {
           console.log("document not created");
@@ -60,7 +73,7 @@ const AppBar = (props) => {
     console.log("All clicked");
     navigate("/dashboard", { state: { AppbarSelectedPage: "all", username } });
   };
-  ////////////////////////////LOGOUT CLICK HANDLER//////////////////////////// 
+  ////////////////////////////LOGOUT CLICK HANDLER////////////////////////////
   const handleLogoutClick = () => {
     console.log("Logout clicked");
     localStorage.removeItem("token");
@@ -94,7 +107,6 @@ const AppBar = (props) => {
           {currentDashboardPage !== "edited" && !name ? (
             <button onClick={handleEditClick}>Shared with me</button>
           ) : null}
-
 
           {currentDashboardPage !== "all" && !name ? (
             <button onClick={handleAllClick}>All</button>
