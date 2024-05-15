@@ -36,7 +36,7 @@ const TextEditor = () => {
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
   useEffect(() => {
-    const s = io("http://localhost:5000/", {
+    const s = io("https://crdt-node-server.onrender.com", {
       query: {
         username,
         docId: docId,
