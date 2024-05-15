@@ -43,9 +43,9 @@ const [crdt_client, setCrdtClient] = useState(null);
   useEffect(() => {
     const client = new CRDT();
     //i need to pop the last 2 elements from the crdt_client.nodes array
-    client.nodes.reverse();
-    client.nodes.pop();
-    client.nodes.pop();
+    // client.nodes.reverse();
+    // client.nodes.pop();
+    // client.nodes.pop();
     setCrdtClient(client);
     console.log("crdt client in beginning of text editor:", client);
   }, []);
@@ -293,14 +293,16 @@ const [crdt_client, setCrdtClient] = useState(null);
     socket.on("crdt", (crdt) => {
         console.log("before receiving crdt from server:", crdt_client)
         console.log("crdt from server:", crdt);
-        //crdt_client = crdt;
+       
+        //setCrdtClient(crdt);
         //console.log("crdt client after receiving crdt from server:", crdt_client);
         const ops = [];
-        for (let node of crdt.nodes) {
-            console.log("node:", node);
-            //crdt_client.insertPosition(node);
-
-            crdt_client.nodes.push(node);
+        for (let node in crdt.nodes) {
+            //console.log("node:", node);
+            crdt_client.insertPosition(node);
+            // crdt_client.nodes.push(node);
+            // node =crdt[i];
+            
             const retain = crdt_client.get_PositionToDisplayIndex(node) != -1
             ? crdt_client.get_PositionToDisplayIndex(node)
             : null;
