@@ -5,13 +5,14 @@ class Node {
         this.bold = bold;
         this.italic = italic;
         this.tombstone = tombstone;
+        this.time_stamp = Date.now();
     }
 }
 
 class CRDT {
     constructor() {
-        // this.nodes = [new Node(Number.MIN_VALUE, ''), new Node(Number.MAX_VALUE, '')];
-        this.nodes = [new Node('', 0), new Node('', 10)];
+        this.nodes = [new Node(Number.MIN_VALUE, ''), new Node(Number.MAX_VALUE, '')];
+        //   this.nodes = [new Node('', 0), new Node('', 10)];
     }
 
     // When the server receives an insert event from a client, it inserts the node into the CRDT instance
@@ -46,10 +47,12 @@ class CRDT {
 
     // When the client deletes a node, it searches for the display index of the node and deletes the node at that index
     deleteDisplayIndex(displayIndex) {
-        // console.log("inside deleteDisplayIndex")
-        // console.log("displayIndex", displayIndex)
+        console.log("inside deleteDisplayIndex")
+        console.log("displayIndex", displayIndex)
         let position = this.get_DisplayIndexToPosition(displayIndex);
         let arrayIndex = this.positionToArrayIndex(position);
+        console.log("arrayIndex", arrayIndex)
+        console.log("err", this.nodes[arrayIndex])
         this.nodes[arrayIndex].tombstone = true;
         // console.log("arrayIndex", arrayIndex)
         // console.log("position", position)
@@ -62,11 +65,9 @@ class CRDT {
     }
 
     ////////////////////////////////////////////////////// Helper Functions /////////////////////////////////////////////////////////////////////
-
     positionToArrayIndex(position) {
         return this.nodes.findIndex(node => node.position > position);
     }
-
     // Convert between displayIndex and position
     // Iterate over the array and skip over the tombstones = true nodes, when you reach the display index, find the average between the current and next position
     calculate_DisplayIndexToPosition(displayIndex) {
@@ -74,9 +75,6 @@ class CRDT {
         for (let node of this.nodes) {
             if (!node.tombstone) {
                 if (count === displayIndex) {
-                    // console.log("crdt", this.nodes)
-                    // console.log('node', node);
-                    // console.log('gomla tawila', this.nodes[this.nodes.indexOf(node) + 1]);
                     return (node.position + this.nodes[this.nodes.indexOf(node) + 1].position) / 2;
                 }
                 count++;
@@ -88,8 +86,10 @@ class CRDT {
     get_DisplayIndexToPosition(displayIndex) {
         let count = 0;
         for (let node of this.nodes) {
+            console.log("node", node.tombstone)
             if (!node.tombstone) {
                 if (count === displayIndex) {
+                    console.log(" i", node.position)
                     return node.position;
                 }
                 count++;

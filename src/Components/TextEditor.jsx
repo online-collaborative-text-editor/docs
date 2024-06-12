@@ -6,6 +6,8 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import io from "socket.io-client";
 import { Node, CRDT } from "../CRDT.js";
+import profileuser1 from "../icons/profileuser1.png"
+import profileuser2 from "../icons/profileuser2.png"
 const saveButtonStyle = {
   boxSizing: "border-box",
   width: "30%",
@@ -31,14 +33,17 @@ const TextEditor = () => {
   let page = location.state?.page;
   const docId = location.state?.docId;
   const username = location.state?.username;
-  //console.log("docId in text editor:", docId);
 
-  //   let crdt_client = new CRDT();
-  //   console.log("crdt client in beggining of text editor:", crdt_client);
 
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
   const crdtClientRef = useRef(null);
+  const [users, setUsers] = useState([]);
+  //this is the array of cursors that will be displayed on the text editor
+  //the user should see the cursor of the other users but not his own cursor 
+
+  const [cursors, setCursors] = useState([]);
+
 
 
   useEffect(() => {
@@ -47,6 +52,9 @@ const TextEditor = () => {
 
     console.log("crdt client in beginning of text editor:", client);
   }, []);
+
+
+
 
   useEffect(() => {
     const s = io("http://localhost:5000/", {
@@ -57,6 +65,7 @@ const TextEditor = () => {
     });
     setSocket(s);
     console.log("connected to server");
+
     return () => {
       s.disconnect();
       console.log("i am diconnected");
@@ -78,6 +87,59 @@ const TextEditor = () => {
       editor.style.backgroundColor = "lightgrey";
     }
   }, [page, file]);
+  //this code is excuted at the server side on connection to show the current users in the document
+  /*  socket.emit("users", documentUsers.get(docId)); */
+  useEffect(() => {
+    if (socket == null) return;
+    socket.on("users", (users) => {
+      console.log("users:", users);
+      setUsers(users);
+      renderProfilePictures(users);
+    });
+    return () => {
+      socket.off("users");
+    };
+  }, [socket, quill, users]);
+
+  const renderProfilePictures = (users) => {
+    if (!quill) return;
+    console.log("inside render profile pictures");
+
+    const toolbar = quill.getModule("toolbar");
+    const toolbarContainer = toolbar.container;
+
+    // Ensure the toolbar container is a flexbox
+    toolbarContainer.style.display = "flex";
+    toolbarContainer.style.alignItems = "center"; // Align items vertically in the center
+
+    // Find or create the custom user icons container
+    let userIconsContainer = toolbarContainer.querySelector(".user-icons-container");
+    if (!userIconsContainer) {
+      userIconsContainer = document.createElement("div");
+      userIconsContainer.className = "user-icons-container";
+      userIconsContainer.style.display = "flex";
+      userIconsContainer.style.marginLeft = "auto"; // Move the container to the right
+      userIconsContainer.style.alignItems = "center"; // Ensure vertical alignment
+
+      toolbarContainer.appendChild(userIconsContainer);
+    }
+
+    userIconsContainer.innerHTML = ""; // Clear any existing icons
+
+    users.forEach((user) => {
+      const img = document.createElement("img");
+      const pictureIndex = user.pictures_Indecies;
+      img.src = pictureIndex ? profileuser2 : profileuser1;
+      img.alt = user.username;
+      img.style.width = "30px";
+      img.style.height = "30px";
+      img.style.borderRadius = "50%";
+      img.style.marginLeft = "5px"; // Adjust margin to space icons from each other
+      userIconsContainer.appendChild(img);
+    });
+  };
+
+
 
   useEffect(() => {
     if (quill == null || socket == null) return;
@@ -85,6 +147,11 @@ const TextEditor = () => {
 
     const handler = (delta, oldDelta, source) => {
       if (source !== "user") return;
+      const range = quill.getSelection();
+      if (range) {
+        const position = range.index;
+        console.log('User cursor position:', position);
+      }
       console.log("inside useEffect");
       const crdt_client = crdtClientRef.current;
 
@@ -407,20 +474,6 @@ const TextEditor = () => {
       console.log("delta to update quill:", delta);
       quill.updateContents(delta);
     });
-    // CURSOR UPDATE LOCATION
-    quill.on("selection-change", (range, oldRange, source) => {
-      console.log("selection change");
-      if (range) {
-        if (range.length == 0) {
-          console.log("User cursor is at index", range.index);
-        } else {
-          const text = quill.getText(range.index, range.length);
-          console.log("User has highlighted: ", text);
-        }
-      } else {
-        console.log("User cursor is not in editor");
-      }
-    });
 
     console.log(
       "username:",
@@ -440,9 +493,33 @@ const TextEditor = () => {
 
     const editor = document.createElement("div");
     wrapper.append(editor);
-    const q = new Quill(editor, { theme: "snow" });
+
+    // Define a custom toolbar with a placeholder for user icons
+    const toolbarOptions = [
+      [{ 'font': [] }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+
+      ['userIcons'] // Custom group for user icons
+    ];
+
+    const q = new Quill(editor, {
+      theme: "snow",
+      modules: {
+        toolbar: {
+          container: toolbarOptions,
+          handlers: {
+            // Define a custom handler for userIcons to do nothing
+            'userIcons': function () { }
+          }
+        }
+      }
+    });
+
     setQuill(q);
   }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // const editor = document.querySelector(".ql-editor");
@@ -457,6 +534,27 @@ const TextEditor = () => {
     socket.emit("save", docId);
 
   };
+  //use effect to listen to change in cursor position 
+  useEffect(() => {
+    if (!quill || !socket) return;
+
+    // CURSOR UPDATE LOCATION
+    quill.on("selection-change", (range, oldRange, source) => {
+      console.log("selection change");
+      if (range) {
+        if (range.length == 0) {
+          console.log("User cursor is at index", range.index);
+        } else {
+          const text = quill.getText(range.index, range.length);
+          console.log("User has highlighted: ", text);
+        }
+      } else {
+        console.log("User cursor is not in editor");
+      }
+    });
+  }, [quill, socket]);
+
+
   return (
     <div>
       <AppBar name={file?.name ? file.name : null} page={page} />

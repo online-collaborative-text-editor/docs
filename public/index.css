@@ -404,3 +404,13 @@ body {
     height: 20px;
     margin-right: 5px;
 }
+
+.cursor-username {
+  position: absolute;
+  background-color: yellow;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
+}
